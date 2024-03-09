@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="appName">BilinguAI</string>
+    <!-- Inputs -->
+    <string name="email_placeholder">Enter your email address</string>
+    <string name="password_placeholder">Enter a strong password</string>
+    <string name="confirm_placeholder">Confirm your password</string>
+
+    <!-- Drawer Menu -->
+    <string name="app_details">App Details</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="tos">Terms Of Service</string>
+    <string name="check_developer">Check Developer</string>
+    <string name="review_app">Review App</string>
+    <string name="logout">Logout</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="signed_as">Logged In as %1$s</string>
+    <string name="app_version">App Version: %1$s</string>
+
+    <!-- Messages -->
+    <string name="no_credit">You currently lack sufficient credit to proceed.</string>
+    <string name="new_msg">New to the App?,</string>
+    <string name="old_msg">Already have an Account?,</string>
+    <string name="get_daily_credit">Get your daily free convos</string>
+    <string name="watch_ad">Watch Ad to Get Extra Convos</string>
+    <string name="buy_credit">Buy Convos (Ad Free)</string>
+    <string name="reset_email_sent">A password reset email has been sent.</string>
+    <string name="forgot_password_explication">Request a password reset email and follow the link provided to reset your password.</string>
+    <string name="delete_account_explication">Are you certain you wish to delete your account? If yes, please confirm by entering your password.</string>
+    <string name="delete_data_confirmation">Are you certain you wish to delete this generated data?</string>
+    <string name="cooldown_minutes">No more generations are available. Please wait for %1$d minutes.</string>
+    <string name="cooldown_hours">No more generations are available. Please wait for %1$d hours.</string>
+
+    <!-- Actions -->
+    <string name="next">Next</string>
+    <string name="start">Start</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="generate">Generate</string>
+    <string name="send">Send</string>
+    <string name="delete">Delete</string>
+
+    <!-- Labels -->
+    <string name="name">by Name</string>
+    <string name="date">by Date</string>
+    <string name="temperature">Temperature:</string>
+    <!-- Labels::Temperature -->
+    <string name="basic">(Basic)</string>
+    <string name="normal">(Normal)</string>
+    <string name="creative">(Creative)</string>
+
+    <!-- Sections -->
+    <string name="generated_data">Generated Data</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="delete_data">Delete Data?</string>
+
+    <!-- Values -->
+    <string name="x_credit">%1$d Convos</string>
+    <string name="credit_remaining_x">Convos Remaining: %1$d</string>
+    <string name="x_time_remaining">%1$s remaining to get your daily convos.</string>
+    <string name="on_x">On %1$d %2$s %3$d</string>
+
+    <!-- Errors -->
+    <string name="error_api_key">The API Key is invalid. To continue using our services, please update your app.</string>
+    <string name="error_no_rewarded_ad">Unable to load Rewarded Ad. Please try again later.</string>
+    <string name="error_account_no_exists">No account associated with this email address was found.</string>
+    <string name="error_email_no_exists">The email you provided is not registered in our system.</string>
+    <string name="error_email_might_no_exists">The email you entered may not be in our records.</string>
+    <string name="error_password_wrong">The password you entered is incorrect.</string>
+    <string name="error_email_required">Please provide your email address.</string>
+    <string name="error_email_invalid">The email you provided is not valid.</string>
+    <string name="error_password_required">Please enter your password.</string>
+    <string name="error_password_weak">Your password must be a minimum of 6 characters.</string>
+    <string name="error_confirm_password_required">Please confirm your password.</string>
+    <string name="error_passwords_unmatching">Ensure that the password and confirm password fields match.</string>
+    <string name="error_account_no_exists">It appears that your account has already been deleted or disabled.</string>
+    <string name="error_account_exists">An account is already registered with the email you provided.</string>
+    <string name="error_empty">No data has been generated.</string>
+    <string name="error_network">Unable to establish a connection. Please verify your network connection and attempt again.</string>
+    <string name="error_rate_limit">Currently experiencing high request volume. Please try again in a few minutes.</string>
+    <string name="error_api">An error occurred with the API. Please attempt again later.</string>
+    <string name="error_server">We encountered an issue while contacting the server. Please try again later.</string>
+    <string name="error_server_not_found">The item you are attempting to delete does not appear to be found on the server.</string>
+
+    <!-- Errors Inputs -->
+    <string name="error_required">%1$s is required!</string>
+    <string name="error_min_selection">Please select a minimum of %1$d items.</string>
+    <string name="error_max_selection">Please select no more than %1$d items</string>
+    <string name="error_min">%1$s must be equal to or greater than %2$d</string>
+    <string name="error_max">%1$s must be equal to or less than %2$d</string>
+</resources>

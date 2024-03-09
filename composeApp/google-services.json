@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754291965377",
+    "project_id": "bilinguai",
+    "storage_bucket": "bilinguai.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754291965377:android:19374b3c1e2523a1c20340",
+        "android_client_info": {
+          "package_name": "com.samadtch.bilinguai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFBAQpcfVcHrszAgIbtylc10naWGTL1M4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

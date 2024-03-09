@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DefaultMap>
+    <!-- Base Links -->
+    <entry>
+        <key>PRIVACY_POLICY_LINK</key>
+        <value>https://www.facebook.com/</value>
+    </entry>
+    <entry>
+        <key>TOS_LINK</key>
+        <value>https://www.facebook.com/</value>
+    </entry>
+    <entry>
+        <key>DEVELOPER_ID</key>
+        <value>https://www.facebook.com/</value>
+    </entry>
+    <entry>
+        <key>GENERATIONS_COUNT</key>
+        <value>3</value>
+    </entry>
+    <entry>
+        <key>BASE_COOLDOWN</key>
+        <value>86400</value>
+    </entry>
+
+    <!-- Generation Base Details -->
+    <entry>
+        <key>LLM_PROMPT</key>
+        <value>Generate a conversation between 2 people in {{language}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation) and a map of vocabulary from that conversation (only hardest words) which contains the word as key and the definition as value</value>
+    </entry>
+    <entry>
+        <key>LLM_URL</key>
+        <value>https://api.openai.com/v1/chat/completions</value>
+    </entry>
+    <entry>
+        <key>LLM_MODEL</key>
+        <value>gpt-3.5-turbo</value>
+    </entry>
+</DefaultMap>
