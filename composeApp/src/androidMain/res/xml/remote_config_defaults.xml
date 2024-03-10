@@ -3,15 +3,15 @@
     <!-- Base Links -->
     <entry>
         <key>PRIVACY_POLICY_LINK</key>
-        <value>https://www.facebook.com/</value>
+        <value>https://www.google.com/</value>
     </entry>
     <entry>
         <key>TOS_LINK</key>
-        <value>https://www.facebook.com/</value>
+        <value>https://www.google.com/</value>
     </entry>
     <entry>
         <key>DEVELOPER_ID</key>
-        <value>https://www.facebook.com/</value>
+        <value>Roeia</value>
     </entry>
     <entry>
         <key>GENERATIONS_COUNT</key>
@@ -25,7 +25,7 @@
     <!-- Generation Base Details -->
     <entry>
         <key>LLM_PROMPT</key>
-        <value>Generate a conversation between 2 people in {{language}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation) and a map of vocabulary from that conversation (only hardest words) which contains the word as key and the definition as value</value>
+        <value>Generate a conversation between 2 people in {{language}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation and contains only the messages without the names of the senders) and a map of vocabulary from that conversation (only hardest words) which contains the word as key and the definition as value</value>
     </entry>
     <entry>
         <key>LLM_URL</key>

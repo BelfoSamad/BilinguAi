@@ -49,6 +49,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.samadtch.bilinguai.Resources.strings
 import com.samadtch.bilinguai.models.Data
 import com.samadtch.bilinguai.models.pojo.inputs.BaseInput
@@ -183,18 +184,19 @@ fun HomeScreen(
                 }
 
                 "COOLDOWN" -> {
-                    var duration = generationState.errorCode.split("::")[1]
-                        .toLong().toDuration(DurationUnit.SECONDS).inWholeMinutes
-                    var res = strings.cooldown_minutes
-                    if (duration > 60) {
-                        duration = generationState.errorCode.split("::")[1]
-                            .toLong().toDuration(DurationUnit.SECONDS).inWholeHours
-                        res = strings.cooldown_hours
-                    }
-
                     //Show Snackbar
-                    onShowSnackbar(
-                        stringRes(res, listOf(duration)),
+                    var minutes = generationState.errorCode.split("::")[1]
+                        .toLong().toDuration(DurationUnit.SECONDS).inWholeMinutes
+                    if (minutes > 60) {
+                        val hours = generationState.errorCode.split("::")[1]
+                            .toLong().toDuration(DurationUnit.SECONDS).inWholeHours
+                        minutes -= hours * 60
+                        onShowSnackbar(
+                            stringRes(strings.cooldown_hours, listOf(hours, minutes)),
+                            null
+                        )
+                    } else onShowSnackbar(
+                        stringRes(strings.cooldown_minutes, listOf(minutes)),
                         null
                     )
                 }
@@ -261,7 +263,7 @@ fun HomeScreen(
             item {
                 //Top Section
                 Column(Modifier.background(color = MaterialTheme.colorScheme.tertiary)) {
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -462,7 +464,7 @@ fun DynamicForm(
                         input,
                         generateClicked,
                         dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
+                        Modifier.weight(1.25f).align(Alignment.CenterVertically)
                     )
 
                     is NumberInput -> NumberInputView(
@@ -539,12 +541,15 @@ fun DynamicForm(
         Modifier.padding(16.dp, 32.dp, 16.dp, 16.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(Modifier.padding(end = 16.dp).align(Alignment.CenterVertically).weight(1f)) {
+        Column(Modifier.padding(end = 8.dp).align(Alignment.CenterVertically).weight(1f)) {
             Row {
                 Text(
                     modifier = Modifier.padding(0.dp, 0.dp, 4.dp, 0.dp),
                     text = stringRes(strings.temperature, listOf()),
-                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 12.sp
+                    )
                 )
                 Text(
                     text = sliderPosition.toString().split(".")[0] + "." + sliderPosition.toString()
@@ -553,7 +558,10 @@ fun DynamicForm(
                         in 0.3f..0.7f -> " " + stringRes(strings.normal, null)
                         else -> " " + stringRes(strings.creative, null)
                     },
-                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 12.sp
+                    )
                 )
             }
             Slider(

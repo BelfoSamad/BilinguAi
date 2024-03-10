@@ -15,8 +15,11 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.samadtch.bilinguai.databinding.ActivityMainBinding
+import com.samadtch.bilinguai.utilities.exceptions.DataException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +56,8 @@ class MainActivity : FragmentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Firebase.crashlytics.recordException(DataException(1))
 
         //Splash Screen, TODO: Better Solution Later
         installSplashScreen().apply {

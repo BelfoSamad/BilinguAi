@@ -27,9 +27,9 @@
     <string name="reset_email_sent">A password reset email has been sent.</string>
     <string name="forgot_password_explication">Request a password reset email and follow the link provided to reset your password.</string>
     <string name="delete_account_explication">Are you certain you wish to delete your account? If yes, please confirm by entering your password.</string>
-    <string name="delete_data_confirmation">Are you certain you wish to delete this generated data?</string>
-    <string name="cooldown_minutes">No more generations are available. Please wait for %1$d minutes.</string>
-    <string name="cooldown_hours">No more generations are available. Please wait for %1$d hours.</string>
+    <string name="delete_data_confirmation">Are you certain you wish to delete this conversation?</string>
+    <string name="cooldown_minutes">No more convo generations are available. Please wait for %1$d minutes.</string>
+    <string name="cooldown_hours">No more convo generations are available. Please wait for %1$d hours and %2$d minutes.</string>
 
     <!-- Actions -->
     <string name="next">Next</string>
@@ -41,7 +41,7 @@
     <string name="delete">Delete</string>
 
     <!-- Labels -->
-    <string name="name">by Name</string>
+    <string name="name">by Topic</string>
     <string name="date">by Date</string>
     <string name="temperature">Temperature:</string>
     <!-- Labels::Temperature -->
@@ -50,9 +50,9 @@
     <string name="creative">(Creative)</string>
 
     <!-- Sections -->
-    <string name="generated_data">Generated Data</string>
+    <string name="generated_data">Conversations</string>
     <string name="forgot_password">Forgot Password</string>
-    <string name="delete_data">Delete Data?</string>
+    <string name="delete_data">Delete Conversation?</string>
 
     <!-- Values -->
     <string name="x_credit">%1$d Convos</string>

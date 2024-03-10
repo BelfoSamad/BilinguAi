@@ -25,7 +25,7 @@ fun AppTheme(
         darkColorScheme(
             primary = Color(0xFF151515),//Black
             secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFFDAEF68),//Bright
+            tertiary = Color(0xFF8F9BFF),//Bright
             error = Color(0xFFE74C3C),
             surfaceVariant = Color.Transparent,
         )
@@ -34,7 +34,7 @@ fun AppTheme(
         lightColorScheme(
             primary = Color(0xFF151515),//Black
             secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFFDAEF68),//Bright
+            tertiary = Color(0xFF8F9BFF),//Bright
             error = Color(0xFFE74C3C),
             surfaceVariant = Color.Transparent,
         )
@@ -60,6 +60,7 @@ fun PrimaryTextFieldColors(): TextFieldColors {
         focusedTextColor = MaterialTheme.colorScheme.primary,
         unfocusedTextColor = MaterialTheme.colorScheme.primary,
         disabledTextColor = MaterialTheme.colorScheme.primary,
+        disabledPlaceholderColor = MaterialTheme.colorScheme.primary,
         selectionColors = TextSelectionColors(
             handleColor = MaterialTheme.colorScheme.secondary,
             backgroundColor = MaterialTheme.colorScheme.secondary,
@@ -91,6 +92,7 @@ fun SecondaryTextFieldColors(): TextFieldColors {
         focusedTextColor = MaterialTheme.colorScheme.tertiary,
         unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
         disabledTextColor = MaterialTheme.colorScheme.tertiary,
+        disabledPlaceholderColor = MaterialTheme.colorScheme.tertiary,
         selectionColors = TextSelectionColors(
             handleColor = MaterialTheme.colorScheme.secondary,
             backgroundColor = MaterialTheme.colorScheme.secondary,
