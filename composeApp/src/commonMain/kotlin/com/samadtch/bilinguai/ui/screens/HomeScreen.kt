@@ -152,6 +152,11 @@ fun HomeScreen(
                 "AUTH" -> logout()
                 "API" -> {
                     when (generationState.errorCode.split("::")[1].toInt()) {
+                        APIException.API_ERROR_NETWORK -> onShowSnackbar(
+                            stringRes(strings.error_network, null),
+                            null
+                        )
+
                         APIException.API_ERROR_AUTH -> onShowSnackbar(
                             stringRes(strings.error_api_key, null),
                             null
@@ -608,7 +613,7 @@ fun DataHolder(
     Column(
         modifier = Modifier.animateContentSize(
             animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium
+                dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
             )
         )
     ) {

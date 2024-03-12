@@ -62,6 +62,7 @@ data class RegisterUiState(
 @Composable
 fun RegisterScreen(
     stringRes: (id: StringResource, args: List<Any>?) -> String,
+    onShowSnackbar: suspend (Boolean, String, String?) -> Boolean,
     //Go Login
     goLogin: () -> Unit,
     //Register
@@ -92,7 +93,12 @@ fun RegisterScreen(
 
     //------------------------------- Effect
     LaunchedEffect(registerState) {
-        disableInputs = registerState?.isLoading == true
+        if (registerState?.isLoading == true) disableInputs = true
+        else if (registerState?.errorCode == AuthException.AUTH_ERROR_NETWORK) onShowSnackbar(
+            false,
+            stringRes(strings.error_network, null),
+            null
+        )
     }
 
     //------------------------------- UI

@@ -68,6 +68,7 @@ kotlin {
 
                 //Firestore
                 implementation(project.dependencies.platform(libs.firebase.android.bom))
+                implementation(libs.firebase.android.common)
                 implementation(libs.firebase.android.auth)
                 implementation(libs.firebase.android.firestore)
                 implementation(libs.firebase.android.config)

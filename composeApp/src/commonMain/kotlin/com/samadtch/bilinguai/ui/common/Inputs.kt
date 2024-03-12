@@ -128,17 +128,12 @@ fun NumberInputView(
             if (value.isBlank()) {
                 error = stringRes(strings.error_required, listOf(input.label))
                 valueFlow.emit(null)
-            } else if (value.isNotBlank()) {
-                if (input.minValue != null && value.toDouble() < input.minValue!!) {
-                    error = stringRes(strings.error_min, listOf(input.label, input.minValue!!))
-                    valueFlow.emit(null)
-                } else if (input.maxValue != null && value.toDouble() > input.maxValue!!) {
-                    error = stringRes(strings.error_max, listOf(input.label, input.maxValue!!))
-                    valueFlow.emit(null)
-                } else {
-                    error = null
-                    valueFlow.emit(Pair(input.key, value))
-                }
+            } else if (input.minValue != null && value.toDouble() < input.minValue!!) {
+                error = stringRes(strings.error_min, listOf(input.label, input.minValue!!))
+                valueFlow.emit(null)
+            } else if (input.maxValue != null && value.toDouble() > input.maxValue!!) {
+                error = stringRes(strings.error_max, listOf(input.label, input.maxValue!!))
+                valueFlow.emit(null)
             } else {
                 error = null
                 valueFlow.emit(Pair(input.key, value))

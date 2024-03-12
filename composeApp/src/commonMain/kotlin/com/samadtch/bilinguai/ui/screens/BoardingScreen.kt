@@ -102,7 +102,7 @@ fun BoardingScreen(
             Row(Modifier.fillMaxHeight()) {
                 Text(
                     text = annotatedString,
-                    modifier = Modifier.align(Alignment.CenterVertically).padding(start = 16.dp),
+                    modifier = Modifier.align(Alignment.CenterVertically).padding(horizontal = 16.dp),
                     style = TextStyle(
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,

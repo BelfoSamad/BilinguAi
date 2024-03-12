@@ -63,7 +63,7 @@ data class LoginUiState(
 @Composable
 fun LoginScreen(
     stringRes: (id: StringResource, args: List<Any>?) -> String,
-    onShowSnackbar: suspend (String, String?) -> Boolean,
+    onShowSnackbar: suspend (Boolean, String, String?) -> Boolean,
     //Resetting Password
     resetPassword: (String) -> Unit,
     passwordResetState: Int?,
@@ -108,14 +108,29 @@ fun LoginScreen(
 
     //------------------------------- Effect
     LaunchedEffect(loginState) {
-        disableInputs = loginState?.isLoading == true
+        if (loginState?.isLoading == true) disableInputs = true
+        else if (loginState?.errorCode == AuthException.AUTH_ERROR_NETWORK) onShowSnackbar(
+            false,
+            stringRes(strings.error_network, null),
+            null
+        )
     }
 
     LaunchedEffect(passwordResetState) {
         when (passwordResetState) {
+            AuthException.AUTH_ERROR_NETWORK -> {
+                showResetPasswordDialog = false
+                onShowSnackbar(
+                    false,
+                    stringRes(strings.error_network, null),
+                    null
+                )
+            }
+
             AuthException.AUTH_ERROR_USER_NOT_FOUND -> {
                 showResetPasswordDialog = false
                 onShowSnackbar(
+                    false,
                     stringRes(strings.error_account_no_exists, null),
                     null
                 )
@@ -124,6 +139,7 @@ fun LoginScreen(
             -1 -> {
                 showResetPasswordDialog = false
                 onShowSnackbar(
+                    true,
                     stringRes(strings.reset_email_sent, null),
                     null
                 )

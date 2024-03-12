@@ -76,6 +76,7 @@ import com.samadtch.bilinguai.ui.common.CustomSnackbar
 import com.samadtch.bilinguai.ui.common.DeleteAccountDialog
 import com.samadtch.bilinguai.ui.screens.HomeScreen
 import com.samadtch.bilinguai.ui.theme.AppTheme
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_NOT_FOUND
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_SERVICE
 import com.samadtch.bilinguai.utilities.stringResource
@@ -180,6 +181,17 @@ class HomeFragment : Fragment() {
                                 snackbarHostState.showSnackbar(
                                     message = stringResource(
                                         requireContext(), strings.error_server, null
+                                    ),
+                                    actionLabel = null,
+                                    duration = SnackbarDuration.Short,
+                                )
+                            }
+
+                            AUTH_ERROR_NETWORK -> {
+                                showDeleteAccountDialog = false
+                                snackbarHostState.showSnackbar(
+                                    message = stringResource(
+                                        requireContext(), strings.error_network, null
                                     ),
                                     actionLabel = null,
                                     duration = SnackbarDuration.Short,

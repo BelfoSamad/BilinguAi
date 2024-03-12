@@ -9,6 +9,7 @@ import com.samadtch.bilinguai.di.Dispatcher
 import com.samadtch.bilinguai.models.Data
 import com.samadtch.bilinguai.utilities.exceptions.APIException
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
 import com.samadtch.bilinguai.utilities.exceptions.AuthException
@@ -83,8 +84,7 @@ class DataRepository(
                 }
             } catch (e: APIException) {
                 when (e.code) {
-                    API_ERROR_RATE_LIMIT -> Result.failure(e)
-                    API_ERROR_AUTH -> Result.failure(e)
+                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH -> Result.failure(e)
                     else -> Result.failure(APIException(API_ERROR_OTHER))
                 }
             } catch (e: DataException) {

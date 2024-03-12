@@ -15,7 +15,9 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -78,6 +80,7 @@ class LoginFragment : Fragment() {
             setContent {
                 //------------------------------- Declarations
                 val snackbarHostState = remember { SnackbarHostState() }
+                var snackbarSuccess by remember { mutableStateOf(false) }
                 val loginState by viewModel.loginState.collectAsStateWithLifecycle()
                 val passwordResetState by viewModel.passwordResetState.collectAsStateWithLifecycle()
 
@@ -86,7 +89,12 @@ class LoginFragment : Fragment() {
                     Scaffold(snackbarHost = {
                         SnackbarHost(
                             hostState = snackbarHostState,
-                            snackbar = { CustomSnackbar(content = it.visuals.message, isSuccess = true) }
+                            snackbar = {
+                                CustomSnackbar(
+                                    content = it.visuals.message,
+                                    isSuccess = snackbarSuccess
+                                )
+                            }
                         )
                     }) {
                         Surface(
@@ -99,7 +107,8 @@ class LoginFragment : Fragment() {
                                 stringRes = { id, args ->
                                     stringResource(requireContext(), id, args ?: listOf())
                                 },
-                                onShowSnackbar = { message, action ->
+                                onShowSnackbar = { success, message, action ->
+                                    snackbarSuccess = success
                                     snackbarHostState.showSnackbar(
                                         message = message,
                                         actionLabel = action,
@@ -131,34 +140,6 @@ class LoginFragment : Fragment() {
     @PreviewLightDark
     @Composable
     fun LoginScreenPreview() {
-        val snackbarHostState = remember { SnackbarHostState() }
-        AppTheme {
-            Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    LoginScreen(
-                        stringRes = { id, args ->
-                            stringResource(requireContext(), id, args ?: listOf())
-                        },
-                        onShowSnackbar = { message, action ->
-                            snackbarHostState.showSnackbar(
-                                message = message,
-                                actionLabel = action,
-                                duration = SnackbarDuration.Short,
-                            ) == SnackbarResult.ActionPerformed
-                        },
-                        goRegister = { findNavController().navigate(R.id.go_login) },
-                        login = { email, password -> println("$email $password") },
-                        loginState = LoginUiState(),
-                        resetPassword = {},
-                        passwordResetState = -1
-                    )
-                }
-            }
-        }
+        //Done
     }
 }

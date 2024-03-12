@@ -21,11 +21,13 @@ import kotlinx.serialization.json.Json
 import com.samadtch.bilinguai.models.pojo.DataResponse
 import com.samadtch.bilinguai.utilities.exceptions.APIException
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_SERVER_OVERLOAD
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_SERVER_REQUEST
 import com.samadtch.bilinguai.utilities.exceptions.sendCrashlytics
+import io.ktor.util.network.UnresolvedAddressException
 
 class ModelRemoteSource(private val client: HttpClient) : ModelRemoteSource {
 
@@ -58,6 +60,8 @@ class ModelRemoteSource(private val client: HttpClient) : ModelRemoteSource {
 
             //Return Result
             Result.success(Json.decodeFromString<DataResponse>(response.choices.joinToString(" ") { it.message.content }))
+        } catch (e: UnresolvedAddressException) {
+            Result.failure(APIException(API_ERROR_NETWORK))
         } catch (e: RedirectResponseException) {
             Result.failure(APIException(API_ERROR_OTHER, e.message))
         } catch (e: ClientRequestException) {

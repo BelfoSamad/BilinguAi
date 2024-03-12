@@ -8,9 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -23,6 +30,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.samadtch.bilinguai.R
 import com.samadtch.bilinguai.databinding.FragmentRegisterBinding
+import com.samadtch.bilinguai.ui.common.CustomSnackbar
 import com.samadtch.bilinguai.ui.screens.RegisterScreen
 import com.samadtch.bilinguai.ui.screens.RegisterUiState
 import com.samadtch.bilinguai.ui.theme.AppTheme
@@ -71,22 +79,45 @@ class RegisterFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 //------------------------------- Declarations
+                val snackbarHostState = remember { SnackbarHostState() }
+                var snackbarSuccess by remember { mutableStateOf(false) }
                 val registerState by viewModel.registerState.collectAsStateWithLifecycle()
 
                 //------------------------------- Effects
                 AppTheme {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.primary
-                    ) {
-                        RegisterScreen(
-                            stringRes = { id, args ->
-                                stringResource(requireContext(), id, args ?: listOf())
-                            },
-                            goLogin = { findNavController().navigate(R.id.go_login) },
-                            register = viewModel::register,
-                            registerState = registerState
+                    Scaffold(snackbarHost = {
+                        SnackbarHost(
+                            hostState = snackbarHostState,
+                            snackbar = {
+                                CustomSnackbar(
+                                    content = it.visuals.message,
+                                    isSuccess = snackbarSuccess
+                                )
+                            }
                         )
+                    }) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize()
+                                .padding(it),
+                            color = MaterialTheme.colorScheme.primary
+                        ) {
+                            RegisterScreen(
+                                stringRes = { id, args ->
+                                    stringResource(requireContext(), id, args ?: listOf())
+                                },
+                                onShowSnackbar = { success, message, action ->
+                                    snackbarSuccess = success
+                                    snackbarHostState.showSnackbar(
+                                        message = message,
+                                        actionLabel = action,
+                                        duration = SnackbarDuration.Short,
+                                    ) == SnackbarResult.ActionPerformed
+                                },
+                                goLogin = { findNavController().navigate(R.id.go_login) },
+                                register = viewModel::register,
+                                registerState = registerState
+                            )
+                        }
                     }
                 }
             }
@@ -109,24 +140,6 @@ class RegisterFragment : Fragment() {
     @PreviewLightDark
     @Composable
     fun RegisterScreenPreview() {
-        AppTheme {
-            Scaffold {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    RegisterScreen(
-                        stringRes = { id, args ->
-                            stringResource(requireContext(), id, args ?: listOf())
-                        },
-                        goLogin = { findNavController().navigate(R.id.go_login) },
-                        register = { email, password -> println("$email $password") },
-                        registerState = RegisterUiState()
-                    )
-                }
-            }
-        }
+        //Done
     }
 }

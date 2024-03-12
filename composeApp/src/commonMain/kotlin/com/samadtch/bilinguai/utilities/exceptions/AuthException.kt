@@ -3,6 +3,7 @@ package com.samadtch.bilinguai.utilities.exceptions
 class AuthException(val code: Int) : Exception() {
     companion object {
         //Errors
+        const val AUTH_ERROR_NETWORK = 999
         const val AUTH_ERROR_WRONG_CREDENTIALS = 0
         const val AUTH_ERROR_INVALID_EMAIL = 1
         const val AUTH_ERROR_WRONG_EMAIL = 3//Email doesn't exist or account disabled

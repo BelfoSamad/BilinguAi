@@ -167,7 +167,7 @@ class HomeViewModel @Inject constructor(
                 _outState.emit(Unit)//Logged Out
             } catch (e: AuthException) {
                 _deleteAccountState.emit(e.code)//AUTH_ERROR_USER_NOT_FOUND and AUTH_ERROR_USER_WRONG_CREDENTIALS
-            } catch (e: AuthException) {
+            } catch (e: DataException) {
                 _deleteAccountState.emit(e.code)//DATA_ERROR_OTHER
             }
         }
