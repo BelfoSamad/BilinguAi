@@ -140,7 +140,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     val newData = it.data!!.filter { data -> data.dataId != dataId }
                     it.copy(
-                        errorCode = if (newData.isEmpty()) "DATA::94" else null,
+                        errorCode = if (newData.isEmpty()) "DATA::32" else null,
                         data = newData
                     )
                 }
