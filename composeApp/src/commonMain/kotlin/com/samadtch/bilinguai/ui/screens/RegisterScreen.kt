@@ -45,7 +45,10 @@ import com.samadtch.bilinguai.Resources.strings
 import dev.icerock.moko.resources.StringResource
 import com.samadtch.bilinguai.ui.theme.SecondaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryTextFieldColors
-import com.samadtch.bilinguai.utilities.exceptions.AuthException
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_EMAIL_ALREADY_IN_USE
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_INVALID_EMAIL
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_NETWORK
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_WEAK_PASSWORD
 
 /***********************************************************************************************
  * ************************* UI States
@@ -94,7 +97,7 @@ fun RegisterScreen(
     //------------------------------- Effect
     LaunchedEffect(registerState) {
         if (registerState?.isLoading == true) disableInputs = true
-        else if (registerState?.errorCode == AuthException.AUTH_ERROR_NETWORK) onShowSnackbar(
+        else if (registerState?.errorCode == AUTH_ERROR_NETWORK) onShowSnackbar(
             false,
             stringRes(strings.error_network, null),
             null
@@ -147,16 +150,20 @@ private fun RegisterForm(
     LaunchedEffect(registerState) {
         if (registerState != null)
             when (registerState.errorCode) {
-                AuthException.AUTH_ERROR_EMAIL_ALREADY_IN_USE -> errors["email"] =
-                    stringRes(strings.error_account_exists, null)
+                AUTH_ERROR_EMAIL_ALREADY_IN_USE -> {
+                    errors["email"] = stringRes(strings.error_account_exists, null)
+                }
 
-                AuthException.AUTH_ERROR_INVALID_EMAIL -> errors["email"] =
-                    stringRes(strings.error_email_invalid, null)
+                AUTH_ERROR_INVALID_EMAIL -> {
+                    errors["email"] = stringRes(strings.error_email_invalid, null)
+                }
 
-                AuthException.AUTH_ERROR_WEAK_PASSWORD -> errors["password"] =
-                    stringRes(strings.error_password_weak, null)
+                AUTH_ERROR_WEAK_PASSWORD -> {
+                    errors["password"] = stringRes(strings.error_password_weak, null)
+                }
 
-                null -> {/*DO NOTHING*/
+                null -> {
+                    /*DO NOTHING*/
                 }
             }
     }

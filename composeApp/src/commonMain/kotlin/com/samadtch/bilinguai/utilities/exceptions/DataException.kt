@@ -2,13 +2,13 @@ package com.samadtch.bilinguai.utilities.exceptions
 
 class DataException(val code: Int) : Exception() {
     companion object {
-        const val DATA_ERROR_NETWORK = 91 //Either concurrency problem or network interruptions
-        const val DATA_ERROR_SERVICE = 92 //An error most likely related to server
-        const val DATA_ERROR_DEADLINE_EXCEEDED = 93 //Either slow internet connection or big query
-        const val DATA_ERROR_NOT_FOUND = 94 //Query not founded or empty list
-        const val DATA_ERROR_ALREADY_EXISTS = 95
-        const val DATA_ERROR_CONCURRENCY = 96
-        const val DATA_ERROR_UNAUTHENTICATED = 97
+        const val DATA_ERROR_NETWORK = -30 //Either concurrency problem or network interruptions
+        const val DATA_ERROR_SERVICE = 30 //An error most likely related to server
+        const val DATA_ERROR_DEADLINE_EXCEEDED = 31 //Either slow internet connection or big query
+        const val DATA_ERROR_NOT_FOUND = 32 //Query not founded or empty list
+        const val DATA_ERROR_ALREADY_EXISTS = 33
+        const val DATA_ERROR_CONCURRENCY = 34
+        const val DATA_ERROR_UNAUTHENTICATED = 35
 
         //Firebase - Errors
         val FIRESTORE_SERVICE_ERRORS = listOf(2, 3, 7, 8, 9, 11, 12, 13, 14, 15)

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BilinguAI</string>
+    <string name="app_name">BilinguAi</string>
     <string name="ADMOB_APP_ID">ca-app-pub-3832907026732826~2908003781</string>
     <string name="INTERSTITIAL_AD_ID">ca-app-pub-3832907026732826/3359429925</string>
 </resources>

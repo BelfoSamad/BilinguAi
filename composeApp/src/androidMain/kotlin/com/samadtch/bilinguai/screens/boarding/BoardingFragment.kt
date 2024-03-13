@@ -100,20 +100,6 @@ class BoardingFragment : Fragment() {
     @PreviewLightDark
     @Composable
     fun BoardingScreenPreview() {
-        AppTheme {
-            Scaffold {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                    color = MaterialTheme.colorScheme.tertiary
-                ) {
-                    BoardingScreen(
-                        goRegister = { },//Set first time then go to register directly
-                        hypes = getHypes()
-                    )
-                }
-            }
-        }
+        //Done
     }
 }

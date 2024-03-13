@@ -46,7 +46,10 @@ import dev.icerock.moko.resources.StringResource
 import com.samadtch.bilinguai.ui.common.ForgotPasswordDialog
 import com.samadtch.bilinguai.ui.theme.SecondaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryTextFieldColors
-import com.samadtch.bilinguai.utilities.exceptions.AuthException
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_NETWORK
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_NOT_FOUND
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_WRONG_EMAIL
+import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_WRONG_PASSWORD
 
 /***********************************************************************************************
  * ************************* UI States
@@ -109,7 +112,7 @@ fun LoginScreen(
     //------------------------------- Effect
     LaunchedEffect(loginState) {
         if (loginState?.isLoading == true) disableInputs = true
-        else if (loginState?.errorCode == AuthException.AUTH_ERROR_NETWORK) onShowSnackbar(
+        else if (loginState?.errorCode == AUTH_ERROR_NETWORK) onShowSnackbar(
             false,
             stringRes(strings.error_network, null),
             null
@@ -118,7 +121,7 @@ fun LoginScreen(
 
     LaunchedEffect(passwordResetState) {
         when (passwordResetState) {
-            AuthException.AUTH_ERROR_NETWORK -> {
+            AUTH_ERROR_NETWORK -> {
                 showResetPasswordDialog = false
                 onShowSnackbar(
                     false,
@@ -127,7 +130,7 @@ fun LoginScreen(
                 )
             }
 
-            AuthException.AUTH_ERROR_USER_NOT_FOUND -> {
+            AUTH_ERROR_USER_NOT_FOUND -> {
                 showResetPasswordDialog = false
                 onShowSnackbar(
                     false,
@@ -202,16 +205,17 @@ private fun LoginForm(
     LaunchedEffect(loginState) {
         if (loginState != null)
             when (loginState.errorCode) {
-                AuthException.AUTH_ERROR_WRONG_EMAIL -> errors["email"] =
-                    stringRes(strings.error_email_no_exists, null)
+                AUTH_ERROR_WRONG_EMAIL -> {
+                    errors["email"] = stringRes(strings.error_email_no_exists, null)
+                }
 
-                AuthException.AUTH_ERROR_WRONG_PASSWORD -> {
+                AUTH_ERROR_WRONG_PASSWORD -> {
                     errors["password"] = stringRes(strings.error_password_wrong, null)
                     errors["email"] = stringRes(strings.error_email_might_no_exists, null)
                 }
 
                 null -> {
-                    /*DO NOTHING*/
+                    /* DO NOTHING */
                 }
             }
     }

@@ -17,12 +17,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -68,9 +68,14 @@ import com.samadtch.bilinguai.ui.theme.OutlinedButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryIconButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryIconButtonColors
-import com.samadtch.bilinguai.utilities.exceptions.APIException
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_NETWORK
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_LOGGED_OUT
-import com.samadtch.bilinguai.utilities.exceptions.DataException
+import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NETWORK
+import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NOT_FOUND
+import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_SERVICE
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
@@ -130,12 +135,12 @@ fun HomeScreen(
                 "AUTH" -> logout()
                 "DATA" -> {
                     when (uiState.errorCode.split("::")[1].toInt()) {
-                        DataException.DATA_ERROR_NETWORK -> onShowSnackbar(
+                        DATA_ERROR_NETWORK -> onShowSnackbar(
                             stringRes(strings.error_network, null),
                             null
                         )
 
-                        DataException.DATA_ERROR_SERVICE -> onShowSnackbar(
+                        DATA_ERROR_SERVICE -> onShowSnackbar(
                             stringRes(strings.error_server, null),
                             null
                         )
@@ -152,22 +157,22 @@ fun HomeScreen(
                 "AUTH" -> logout()
                 "API" -> {
                     when (generationState.errorCode.split("::")[1].toInt()) {
-                        APIException.API_ERROR_NETWORK -> onShowSnackbar(
+                        API_ERROR_NETWORK -> onShowSnackbar(
                             stringRes(strings.error_network, null),
                             null
                         )
 
-                        APIException.API_ERROR_AUTH -> onShowSnackbar(
+                        API_ERROR_AUTH -> onShowSnackbar(
                             stringRes(strings.error_api_key, null),
                             null
                         )
 
-                        APIException.API_ERROR_RATE_LIMIT -> onShowSnackbar(
+                        API_ERROR_RATE_LIMIT -> onShowSnackbar(
                             stringRes(strings.error_rate_limit, null),
                             null
                         )
 
-                        APIException.API_ERROR_OTHER -> onShowSnackbar(
+                        API_ERROR_OTHER -> onShowSnackbar(
                             stringRes(strings.error_api, null),
                             null
                         )
@@ -176,7 +181,7 @@ fun HomeScreen(
 
                 "DATA" -> {
                     when (generationState.errorCode.split("::")[1].toInt()) {
-                        DataException.DATA_ERROR_NETWORK -> onShowSnackbar(
+                        DATA_ERROR_NETWORK -> onShowSnackbar(
                             stringRes(strings.error_network, null),
                             null
                         )
@@ -216,7 +221,7 @@ fun HomeScreen(
                 showDeleteDataDialog = null
             }
 
-            DataException.DATA_ERROR_NETWORK -> {
+            DATA_ERROR_NETWORK -> {
                 onShowSnackbar(
                     stringRes(strings.error_network, null),
                     null
@@ -224,7 +229,7 @@ fun HomeScreen(
                 showDeleteDataDialog = null
             }
 
-            DataException.DATA_ERROR_SERVICE -> {
+            DATA_ERROR_SERVICE -> {
                 onShowSnackbar(
                     stringRes(strings.error_server, null),
                     null
@@ -232,7 +237,7 @@ fun HomeScreen(
                 showDeleteDataDialog = null
             }
 
-            DataException.DATA_ERROR_NOT_FOUND -> {
+            DATA_ERROR_NOT_FOUND -> {
                 onShowSnackbar(
                     stringRes(strings.error_server_not_found, null),
                     null
@@ -323,7 +328,7 @@ fun HomeScreen(
                         Icon(
                             modifier = Modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
                                 .align(Alignment.CenterVertically),
-                            imageVector = Icons.Filled.Sort,
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
                             tint = MaterialTheme.colorScheme.secondary,
                             contentDescription = null
                         )
@@ -362,7 +367,7 @@ fun HomeScreen(
         }
 
         //Error Situation
-        if (uiState.errorCode != null && uiState.errorCode == "DATA::94") {
+        if (uiState.errorCode != null && uiState.errorCode == "DATA::32") {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).weight(1f),
                 verticalArrangement = Arrangement.Center

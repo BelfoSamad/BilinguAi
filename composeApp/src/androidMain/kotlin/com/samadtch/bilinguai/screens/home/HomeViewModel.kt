@@ -65,7 +65,7 @@ class HomeViewModel @Inject constructor(
                     },
                     email = userRepository.getEmail().getOrNull(),
                     //Initially sorted by date
-                    data = data.getOrNull()?.sortedBy { data -> data.createdAt }
+                    data = data.getOrNull()?.sortedByDescending { data -> data.createdAt }
                 )
             }
         }
@@ -77,8 +77,8 @@ class HomeViewModel @Inject constructor(
         sortByDate = byDate
         _uiState.update { state ->
             state.copy(
-                data = if (byDate) state.data?.sortedBy { it.createdAt }
-                else state.data?.sortedBy { it.topic }
+                data = if (byDate) state.data?.sortedByDescending { it.createdAt }
+                else state.data?.sortedByDescending { it.topic }
             )
         }
     }
@@ -115,7 +115,7 @@ class HomeViewModel @Inject constructor(
                         state.copy(
                             errorCode = null,
                             //List Re-Sorted
-                            data = if (sortByDate) newData.sortedBy { it.createdAt }
+                            data = if (sortByDate) newData.sortedByDescending { it.createdAt }
                             else newData.sortedBy { it.topic },
                         )
                     }
@@ -163,7 +163,7 @@ class HomeViewModel @Inject constructor(
             _deleteAccountState.emit(-99)//Loading State
             try {
                 userRepository.deleteAccount(password)
-                _deleteAccountState.emit(-1)//Loading State
+                _deleteAccountState.emit(-1)//End State
                 _outState.emit(Unit)//Logged Out
             } catch (e: AuthException) {
                 _deleteAccountState.emit(e.code)//AUTH_ERROR_USER_NOT_FOUND and AUTH_ERROR_USER_WRONG_CREDENTIALS

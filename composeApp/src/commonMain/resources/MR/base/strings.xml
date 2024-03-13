@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="appName">BilinguAI</string>
+    <string name="appName">BilinguAi</string>
     <!-- Inputs -->
     <string name="email_placeholder">Enter your email address</string>
     <string name="password_placeholder">Enter a strong password</string>

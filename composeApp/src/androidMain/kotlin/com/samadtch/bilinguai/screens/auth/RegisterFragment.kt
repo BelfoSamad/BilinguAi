@@ -32,7 +32,6 @@ import com.samadtch.bilinguai.R
 import com.samadtch.bilinguai.databinding.FragmentRegisterBinding
 import com.samadtch.bilinguai.ui.common.CustomSnackbar
 import com.samadtch.bilinguai.ui.screens.RegisterScreen
-import com.samadtch.bilinguai.ui.screens.RegisterUiState
 import com.samadtch.bilinguai.ui.theme.AppTheme
 import com.samadtch.bilinguai.utilities.stringResource
 import dagger.hilt.android.AndroidEntryPoint
@@ -129,10 +128,6 @@ class RegisterFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    /***********************************************************************************************
-     * ************************* Methods
-     */
 
     /***********************************************************************************************
      * ************************* Preview
