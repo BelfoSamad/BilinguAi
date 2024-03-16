@@ -31,6 +31,10 @@
     <string name="cooldown_minutes">No more convo generations are available. Please wait for %1$d minutes.</string>
     <string name="cooldown_hours">No more convo generations are available. Please wait for %1$d hours and %2$d minutes.</string>
 
+    <string name="verification_steps">An Email is sent to verify your account. Follow instructions and re-login.</string>
+    <string name="resend_verification_email">Click to re-send verification email.</string>
+    <string name="verification_email_sent">The Email verification link is sent!</string>
+
     <!-- Actions -->
     <string name="next">Next</string>
     <string name="start">Start</string>
@@ -81,6 +85,7 @@
     <string name="error_api">An error occurred with the API. Please attempt again later.</string>
     <string name="error_server">We encountered an issue while contacting the server. Please try again later.</string>
     <string name="error_server_not_found">The item you are attempting to delete does not appear to be found on the server.</string>
+    <string name="error_verification">Your account is unverified, Make sure to verify your account before generating.</string>
 
     <!-- Errors Inputs -->
     <string name="error_required">%1$s is required!</string>

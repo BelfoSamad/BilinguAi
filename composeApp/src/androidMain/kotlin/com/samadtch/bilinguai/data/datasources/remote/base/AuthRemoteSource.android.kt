@@ -34,7 +34,7 @@ class AuthRemoteSourceAndroid(
     override suspend fun register(email: String, password: String) = try {
         val user = auth.createUserWithEmailAndPassword(email, password)
             .await().user!!
-        //Use Later: user.sendEmailVerification().await()
+        user.sendEmailVerification().await()
         db.collection("users").document(user.uid).set(mapOf<String, String>()).await()
         //Return Id
         Result.success(user.uid)

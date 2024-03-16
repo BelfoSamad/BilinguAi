@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.IntegrationInstructions
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material3.DrawerValue
@@ -165,6 +165,7 @@ class HomeFragment : Fragment() {
                 val scope = rememberCoroutineScope()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 val snackbarHostState = remember { SnackbarHostState() }
+                var snackbarSuccess by remember { mutableStateOf(false) }
                 var showDeleteAccountDialog by rememberSaveable { mutableStateOf(false) }
                 //UI States
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -246,7 +247,11 @@ class HomeFragment : Fragment() {
                                             modifier = Modifier
                                                 .padding(top = 24.dp, bottom = 48.dp)
                                                 .align(Alignment.CenterHorizontally),
-                                            text = stringResource(requireContext(), strings.appName, null),
+                                            text = stringResource(
+                                                requireContext(),
+                                                strings.appName,
+                                                null
+                                            ),
                                             style = MaterialTheme.typography.headlineLarge.copy(
                                                 color = MaterialTheme.colorScheme.tertiary,
                                                 fontSize = 32.sp
@@ -394,7 +399,7 @@ class HomeFragment : Fragment() {
                                             onClick = { viewModel.logout() },
                                             icon = {
                                                 Icon(
-                                                    imageVector = Icons.Default.Logout,
+                                                    imageVector = Icons.AutoMirrored.Default.Logout,
                                                     contentDescription = null,
                                                     tint = MaterialTheme.colorScheme.error
                                                 )
@@ -463,7 +468,12 @@ class HomeFragment : Fragment() {
                             snackbarHost = {
                                 SnackbarHost(
                                     hostState = snackbarHostState,
-                                    snackbar = { CustomSnackbar(content = it.visuals.message) }
+                                    snackbar = {
+                                        CustomSnackbar(
+                                            content = it.visuals.message,
+                                            isSuccess = snackbarSuccess
+                                        )
+                                    }
                                 )
                             }
                         ) {
@@ -477,7 +487,8 @@ class HomeFragment : Fragment() {
                                     stringRes = { id, args ->
                                         stringResource(requireContext(), id, args ?: listOf())
                                     },
-                                    onShowSnackbar = { message, action ->
+                                    onShowSnackbar = { success, message, action ->
+                                        snackbarSuccess = success
                                         snackbarHostState.showSnackbar(
                                             message = message,
                                             actionLabel = action,
@@ -486,6 +497,7 @@ class HomeFragment : Fragment() {
                                     },
                                     openDrawer = { scope.launch { drawerState.open() } },
                                     inputs = getInputs(),
+                                    sendVerificationEmail = { viewModel.verifyEmail() },
                                     //Drawer Menu
                                     logout = viewModel::logout,
                                     //States

@@ -3,6 +3,7 @@ package com.samadtch.bilinguai.ui.screens
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -39,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,7 +50,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samadtch.bilinguai.Resources.strings
@@ -79,6 +84,7 @@ import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -91,6 +97,7 @@ import kotlin.time.toDuration
 data class DataUiState(
     val isLoading: Boolean = true,
     val errorCode: String? = null,
+    val isVerified: Boolean? = null,
     val data: List<Data>? = null,
     val email: String? = null
 )
@@ -107,9 +114,10 @@ data class GenerationUiState(
 @Composable
 fun HomeScreen(
     stringRes: (id: StringResource, args: List<Any>?) -> String,
-    onShowSnackbar: suspend (String, String?) -> Boolean,
+    onShowSnackbar: suspend (Boolean, String, String?) -> Boolean,
     inputs: List<List<BaseInput>>,
     openDrawer: () -> Unit,
+    sendVerificationEmail: () -> Unit,
     //Drawer Menu
     logout: () -> Unit,
     //States
@@ -122,6 +130,7 @@ fun HomeScreen(
     onDataDeleted: (dataId: String) -> Unit
 ) {
     //------------------------------- Declarations
+    val coroutineScope = rememberCoroutineScope()
     var sort by rememberSaveable { mutableStateOf(true) }
     var word by rememberSaveable { mutableStateOf<String?>(null) }
     var definition by rememberSaveable { mutableStateOf<String?>(null) }
@@ -136,11 +145,13 @@ fun HomeScreen(
                 "DATA" -> {
                     when (uiState.errorCode.split("::")[1].toInt()) {
                         DATA_ERROR_NETWORK -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_network, null),
                             null
                         )
 
                         DATA_ERROR_SERVICE -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_server, null),
                             null
                         )
@@ -158,21 +169,25 @@ fun HomeScreen(
                 "API" -> {
                     when (generationState.errorCode.split("::")[1].toInt()) {
                         API_ERROR_NETWORK -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_network, null),
                             null
                         )
 
                         API_ERROR_AUTH -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_api_key, null),
                             null
                         )
 
                         API_ERROR_RATE_LIMIT -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_rate_limit, null),
                             null
                         )
 
                         API_ERROR_OTHER -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_api, null),
                             null
                         )
@@ -182,15 +197,25 @@ fun HomeScreen(
                 "DATA" -> {
                     when (generationState.errorCode.split("::")[1].toInt()) {
                         DATA_ERROR_NETWORK -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_network, null),
                             null
                         )
 
                         else -> onShowSnackbar(
+                            false,
                             stringRes(strings.error_server, null),
                             null
                         )
                     }
+                }
+
+                "VERIFICATION" -> {
+                    onShowSnackbar(
+                        false,
+                        stringRes(strings.error_verification, null),
+                        null
+                    )
                 }
 
                 "COOLDOWN" -> {
@@ -202,10 +227,12 @@ fun HomeScreen(
                             .toLong().toDuration(DurationUnit.SECONDS).inWholeHours
                         minutes -= hours * 60
                         onShowSnackbar(
+                            false,
                             stringRes(strings.cooldown_hours, listOf(hours, minutes)),
                             null
                         )
                     } else onShowSnackbar(
+                        false,
                         stringRes(strings.cooldown_minutes, listOf(minutes)),
                         null
                     )
@@ -223,6 +250,7 @@ fun HomeScreen(
 
             DATA_ERROR_NETWORK -> {
                 onShowSnackbar(
+                    false,
                     stringRes(strings.error_network, null),
                     null
                 )
@@ -231,6 +259,7 @@ fun HomeScreen(
 
             DATA_ERROR_SERVICE -> {
                 onShowSnackbar(
+                    false,
                     stringRes(strings.error_server, null),
                     null
                 )
@@ -239,6 +268,7 @@ fun HomeScreen(
 
             DATA_ERROR_NOT_FOUND -> {
                 onShowSnackbar(
+                    false,
                     stringRes(strings.error_server_not_found, null),
                     null
                 )
@@ -295,6 +325,39 @@ fun HomeScreen(
                             )
                         }
                     }
+
+                    if (uiState.isVerified == false) ClickableText(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                            .border(
+                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                CircleShape
+                            )
+                            .align(Alignment.CenterHorizontally)
+                            .padding(vertical = 16.dp, horizontal = 12.dp),
+                        text = buildAnnotatedString {
+                            append(stringRes(strings.verification_steps, null))
+                            append("\n")
+                            withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                                append(stringRes(strings.resend_verification_email, null))
+                            }
+                        },
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 12.sp
+                        ),
+                        onClick = {
+                            sendVerificationEmail()
+                            coroutineScope.launch {
+                                onShowSnackbar(
+                                    true,
+                                    stringRes(strings.verification_email_sent, null),
+                                    null
+                                )
+                            }
+                        }
+                    )
 
                     //Dynamic Form
                     DynamicForm(

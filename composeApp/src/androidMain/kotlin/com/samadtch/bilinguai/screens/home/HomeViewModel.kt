@@ -63,6 +63,7 @@ class HomeViewModel @Inject constructor(
                         is DataException -> "DATA::" + exception.code
                         else -> null
                     },
+                    isVerified = userRepository.checkEmailVerified().getOrNull(),
                     email = userRepository.getEmail().getOrNull(),
                     //Initially sorted by date
                     data = data.getOrNull()?.sortedByDescending { data -> data.createdAt }
@@ -89,7 +90,10 @@ class HomeViewModel @Inject constructor(
             _generationState.emit(GenerationUiState())
 
             //Generate Data
-            if (configRepository.generationsRemaining() ||
+            if (userRepository.checkEmailVerified().getOrNull() == false) _generationState.update {
+                it?.copy(isLoading = false, errorCode = "VERIFICATION")
+            } else if (
+                configRepository.generationsRemaining() ||
                 (configRepository.getCooldown()?.minus(Clock.System.now().epochSeconds) ?: -1) < 0
             ) {
                 val response = dataRepository.generateData(inputs, temperature)
@@ -125,7 +129,9 @@ class HomeViewModel @Inject constructor(
             } else _generationState.update {
                 it?.copy(
                     isLoading = false,
-                    errorCode = "COOLDOWN::${configRepository.getCooldown()?.minus(Clock.System.now().epochSeconds)}"
+                    errorCode = "COOLDOWN::${
+                        configRepository.getCooldown()?.minus(Clock.System.now().epochSeconds)
+                    }"
                 )
             }
         }
@@ -152,6 +158,8 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun verifyEmail() = viewModelScope.launch { userRepository.verifyEmail() }
 
     fun logout() = viewModelScope.launch {
         userRepository.logout()
