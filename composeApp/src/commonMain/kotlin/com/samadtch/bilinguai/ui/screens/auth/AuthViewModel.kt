@@ -1,21 +1,16 @@
-package com.samadtch.bilinguai.screens.auth
+package com.samadtch.bilinguai.ui.screens.auth
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.samadtch.bilinguai.data.repositories.base.UserRepository
-import com.samadtch.bilinguai.ui.screens.LoginUiState
-import com.samadtch.bilinguai.ui.screens.RegisterUiState
+import com.samadtch.bilinguai.utilities.exceptions.AuthException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.samadtch.bilinguai.utilities.exceptions.AuthException
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Inject
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
 
-@HiltViewModel
-class AuthViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
+class AuthViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     /***********************************************************************************************
      * ************************* Declarations

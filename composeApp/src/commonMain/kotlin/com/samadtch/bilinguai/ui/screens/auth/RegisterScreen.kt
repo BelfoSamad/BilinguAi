@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.ui.screens
+package com.samadtch.bilinguai.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +17,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -49,6 +50,8 @@ import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_INVALID_EMAIL
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_WEAK_PASSWORD
+import dev.icerock.moko.resources.compose.stringResource
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 /***********************************************************************************************
  * ************************* UI States
@@ -64,18 +67,16 @@ data class RegisterUiState(
  */
 @Composable
 fun RegisterScreen(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
-    onShowSnackbar: suspend (Boolean, String, String?) -> Boolean,
-    //Go Login
+    viewModel: AuthViewModel,
+    onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
     goLogin: () -> Unit,
-    //Register
-    register: (String, String) -> Unit,
-    registerState: RegisterUiState?
+    goHome: () -> Unit
 ) {
     //------------------------------- Declarations
+    val registerState by viewModel.registerState.collectAsStateWithLifecycle()
     var disableInputs by remember { mutableStateOf(false) }
     val annotatedString = buildAnnotatedString {
-        append(stringRes(strings.old_msg, null))
+        append(stringResource(strings.old_msg))
         append(" ")
         withStyle(
             style = SpanStyle(
@@ -84,7 +85,7 @@ fun RegisterScreen(
                 color = MaterialTheme.colorScheme.tertiary
             )
         ) {
-            append(stringRes(strings.login, null))
+            append(stringResource(strings.login))
         }
         addStringAnnotation(
             tag = "Auth",
@@ -97,44 +98,50 @@ fun RegisterScreen(
     //------------------------------- Effect
     LaunchedEffect(registerState) {
         if (registerState?.isLoading == true) disableInputs = true
-        else if (registerState?.errorCode == AUTH_ERROR_NETWORK) onShowSnackbar(
-            false,
-            stringRes(strings.error_network, null),
-            null
-        )
+        else if (registerState?.userId != null) goHome()
+        else {
+            disableInputs = false
+            if (registerState?.errorCode == AUTH_ERROR_NETWORK)
+                onShowSnackbar(false, strings.error_network, null, null)
+        }
     }
 
     //------------------------------- UI
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.SpaceEvenly) {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = stringRes(strings.appName, null),
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontSize = 48.sp
+    Surface(color = MaterialTheme.colorScheme.primary) {
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.SpaceEvenly) {
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = stringResource(strings.appName),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 48.sp
+                    )
+                )//Logo
+
+                //Form and Button
+                RegisterForm(
+                    !disableInputs,
+                    { email, password -> viewModel.register(email, password) },
+                    registerState
                 )
-            )//Logo
-
-            //Form and Button
-            RegisterForm(stringRes, !disableInputs, register, registerState)
-        }
-
-        //Routing to Login
-        ClickableText(
-            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
-            text = annotatedString,
-            style = MaterialTheme.typography.labelLarge.copy(color = Color.White),
-            onClick = { offset ->
-                if (annotatedString.getStringAnnotations(offset, offset).isNotEmpty()) goLogin()
             }
-        )
+
+            //Routing to Login
+            ClickableText(
+                modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
+                text = annotatedString,
+                style = MaterialTheme.typography.labelLarge.copy(color = Color.White),
+                onClick = { offset ->
+                    if (annotatedString.getStringAnnotations(offset, offset).isNotEmpty()) goLogin()
+                }
+            )
+        }
     }
 }
 
 @Composable
 private fun RegisterForm(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     enable: Boolean,
     register: (String, String) -> Unit,
     registerState: RegisterUiState?
@@ -144,27 +151,25 @@ private fun RegisterForm(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    val errors = remember { mutableStateMapOf<String, String>() }
+    val errors = remember { mutableStateMapOf<String, StringResource>() }
 
     //------------------------------- Effects
     LaunchedEffect(registerState) {
         if (registerState != null)
             when (registerState.errorCode) {
                 AUTH_ERROR_EMAIL_ALREADY_IN_USE -> {
-                    errors["email"] = stringRes(strings.error_account_exists, null)
+                    errors["email"] = strings.error_account_exists
                 }
 
                 AUTH_ERROR_INVALID_EMAIL -> {
-                    errors["email"] = stringRes(strings.error_email_invalid, null)
+                    errors["email"] = strings.error_email_invalid
                 }
 
                 AUTH_ERROR_WEAK_PASSWORD -> {
-                    errors["password"] = stringRes(strings.error_password_weak, null)
+                    errors["password"] = strings.error_password_weak
                 }
 
-                null -> {
-                    /*DO NOTHING*/
-                }
+                null -> {}
             }
     }
 
@@ -178,16 +183,18 @@ private fun RegisterForm(
             textStyle = MaterialTheme.typography.labelSmall,
             placeholder = {
                 Text(
-                    text = stringRes(strings.email_placeholder, null),
+                    text = stringResource(strings.email_placeholder),
                     style = MaterialTheme.typography.labelSmall
                 )
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             isError = errors["email"] != null,
-            supportingText = { if (errors["email"] != null) Text(
-                text = errors["email"]!!,
-                style = MaterialTheme.typography.bodyMedium
-            ) },
+            supportingText = {
+                if (errors["email"] != null) Text(
+                    text = stringResource(errors["email"]!!),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
             value = email,
             onValueChange = { email = it }
         )
@@ -199,19 +206,24 @@ private fun RegisterForm(
             textStyle = MaterialTheme.typography.labelSmall,
             placeholder = {
                 Text(
-                    text = stringRes(strings.password_placeholder, null),
+                    text = stringResource(strings.password_placeholder),
                     style = MaterialTheme.typography.labelSmall
                 )
             },
             isError = errors["password"] != null,
-            supportingText = { if (errors["password"] != null) Text(
-                text = errors["password"]!!,
-                style = MaterialTheme.typography.bodyMedium
-            ) },
+            supportingText = {
+                if (errors["password"] != null) Text(
+                    text = stringResource(errors["password"]!!),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
             value = password,
             onValueChange = { password = it },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             trailingIcon = {
                 val image = if (passwordVisible)
                     Icons.Filled.Visibility
@@ -231,19 +243,24 @@ private fun RegisterForm(
             enabled = enable,
             placeholder = {
                 Text(
-                    text = stringRes(strings.confirm_placeholder, null),
+                    text = stringResource(strings.confirm_placeholder),
                     style = MaterialTheme.typography.labelSmall
                 )
             },
             isError = errors["confirmPassword"] != null,
-            supportingText = { if (errors["confirmPassword"] != null) Text(
-                text = errors["confirmPassword"]!!,
-                style = MaterialTheme.typography.bodyMedium
-            ) },
+            supportingText = {
+                if (errors["confirmPassword"] != null) Text(
+                    text = stringResource(errors["confirmPassword"]!!),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             trailingIcon = {
                 val image = if (passwordVisible)
                     Icons.Filled.Visibility
@@ -261,19 +278,17 @@ private fun RegisterForm(
             onClick = {
                 errors.clear()
                 //Validate Form
-                if (email.isBlank()) errors["email"] =
-                    stringRes(strings.error_email_required, null)
-                else if (!Regex("""^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}${'$'}""").matches(email))
-                    errors["email"] = stringRes(strings.error_email_invalid, null)
+                if (email.isBlank()) errors["email"] = strings.error_email_required
+                else if (!Regex("""^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}${'$'}""")
+                        .matches(email)
+                ) errors["email"] = strings.error_email_invalid
 
-                if (password.isBlank()) errors["password"] =
-                    stringRes(strings.error_password_required, null)
-                else if (password.length < 6) errors["password"] =
-                    stringRes(strings.error_password_weak, null)
+                if (password.isBlank()) errors["password"] = strings.error_password_required
+                else if (password.length < 6) errors["password"] = strings.error_password_weak
                 if (confirmPassword.isBlank()) errors["confirmPassword"] =
-                    stringRes(strings.error_confirm_password_required, null)
+                    strings.error_confirm_password_required
                 if (errors.isEmpty() && confirmPassword != password)
-                    errors["confirmPassword"] = stringRes(strings.error_passwords_unmatching, null)
+                    errors["confirmPassword"] = strings.error_passwords_unmatching
 
                 //Register
                 if (errors.isEmpty()) register(email, password)
@@ -285,7 +300,7 @@ private fun RegisterForm(
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
             Text(
-                stringRes(strings.register, null),
+                stringResource(strings.register),
                 style = MaterialTheme.typography.labelLarge
             )
         }

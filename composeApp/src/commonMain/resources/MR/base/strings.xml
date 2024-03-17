@@ -3,6 +3,7 @@
     <string name="appName">BilinguAi</string>
     <!-- Inputs -->
     <string name="email_placeholder">Enter your email address</string>
+    <string name="set_password_placeholder">Enter your password</string>
     <string name="password_placeholder">Enter a strong password</string>
     <string name="confirm_placeholder">Confirm your password</string>
 
@@ -31,7 +32,7 @@
     <string name="cooldown_minutes">No more convo generations are available. Please wait for %1$d minutes.</string>
     <string name="cooldown_hours">No more convo generations are available. Please wait for %1$d hours and %2$d minutes.</string>
 
-    <string name="verification_steps">An Email is sent to verify your account. Follow instructions and re-login.</string>
+    <string name="verification_steps">An Email is sent to verify your account. Follow instructions then re-login.</string>
     <string name="resend_verification_email">Click to re-send verification email.</string>
     <string name="verification_email_sent">The Email verification link is sent!</string>
 

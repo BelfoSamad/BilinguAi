@@ -1,5 +1,4 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec
-import org.jetbrains.compose.ExperimentalComposeLibrary
 
 fun DependencyHandlerScope.kapt(dependencyProvider : Provider<MinimalExternalModuleDependency>){
     add("kapt", dependencyProvider.get())
@@ -96,7 +95,6 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.materialIconsExtended)
-            @OptIn(ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
 
             //Ktor
@@ -104,6 +102,11 @@ kotlin {
             implementation(libs.ktor.client.cio)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+
+            //Pre-Compose
+            implementation(libs.precompose.core)
+            implementation(libs.precompose.viewmodel)
+            implementation(libs.precompose.koin)
 
             //Others
             api(libs.kmm.viewmodel.core)//KMM-ViewModel

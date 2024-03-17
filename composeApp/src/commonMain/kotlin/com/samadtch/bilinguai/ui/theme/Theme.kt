@@ -66,12 +66,12 @@ fun PrimaryTextFieldColors(): TextFieldColors {
             backgroundColor = MaterialTheme.colorScheme.secondary,
         ),
         //Error
-        errorTextColor = MaterialTheme.colorScheme.error,
-        errorTrailingIconColor = MaterialTheme.colorScheme.error,
-        errorIndicatorColor = MaterialTheme.colorScheme.error,
-        errorSupportingTextColor = MaterialTheme.colorScheme.error,
-        errorPlaceholderColor = MaterialTheme.colorScheme.error,
-        errorCursorColor = MaterialTheme.colorScheme.error,
+        errorTextColor = MaterialTheme.colorScheme.primary,
+        errorTrailingIconColor = MaterialTheme.colorScheme.primary,
+        errorIndicatorColor = MaterialTheme.colorScheme.primary,
+        errorSupportingTextColor = MaterialTheme.colorScheme.primary,
+        errorPlaceholderColor = MaterialTheme.colorScheme.primary,
+        errorCursorColor = MaterialTheme.colorScheme.primary,
         //Text
         unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
         focusedTrailingIconColor = MaterialTheme.colorScheme.primary,

@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.base
+package com.samadtch.bilinguai
 
 import android.app.Application
 import com.samadtch.bilinguai.di.initKoin

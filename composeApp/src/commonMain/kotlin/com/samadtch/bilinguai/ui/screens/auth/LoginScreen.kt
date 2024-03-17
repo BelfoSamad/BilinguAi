@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.ui.screens
+package com.samadtch.bilinguai.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +17,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -50,6 +51,8 @@ import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_NOT_FOUND
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_WRONG_EMAIL
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_WRONG_PASSWORD
+import dev.icerock.moko.resources.compose.stringResource
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 /***********************************************************************************************
  * ************************* UI States
@@ -65,21 +68,18 @@ data class LoginUiState(
  */
 @Composable
 fun LoginScreen(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
-    onShowSnackbar: suspend (Boolean, String, String?) -> Boolean,
-    //Resetting Password
-    resetPassword: (String) -> Unit,
-    passwordResetState: Int?,
-    //Go Register
+    viewModel: AuthViewModel,
+    onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
     goRegister: () -> Unit,
-    //Login
-    login: (String, String) -> Unit,
-    loginState: LoginUiState?,
+    goHome: () -> Unit
 ) {
     //------------------------------- Declarations
+    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
+    val passwordResetState by viewModel.passwordResetState.collectAsStateWithLifecycle()
+
     var disableInputs by remember { mutableStateOf(false) }
     val annotatedString = buildAnnotatedString {
-        append(stringRes(strings.new_msg, null))
+        append(stringResource(strings.new_msg))
         append(" ")
         withStyle(
             style = SpanStyle(
@@ -88,7 +88,7 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.tertiary
             )
         ) {
-            append(stringRes(strings.register, null))
+            append(stringResource(strings.register))
         }
         addStringAnnotation(
             tag = "Auth",
@@ -101,51 +101,37 @@ fun LoginScreen(
 
     //------------------------------- Dialogs
     if (showResetPasswordDialog) ForgotPasswordDialog(
-        stringRes = stringRes,
-        resetPassword = resetPassword,
+        resetPassword = { viewModel.sendPasswordResetEmail(it) },
         resetPasswordState = passwordResetState,
-        onDismiss = {
-            if (passwordResetState != -99) showResetPasswordDialog = false
-        }
+        onDismiss = { if (passwordResetState != -99) showResetPasswordDialog = false }
     )
 
     //------------------------------- Effect
     LaunchedEffect(loginState) {
         if (loginState?.isLoading == true) disableInputs = true
-        else if (loginState?.errorCode == AUTH_ERROR_NETWORK) onShowSnackbar(
-            false,
-            stringRes(strings.error_network, null),
-            null
-        )
+        else if (loginState?.userId != null) goHome()
+        else {
+            disableInputs = false
+            if (loginState?.errorCode == AUTH_ERROR_NETWORK)
+                onShowSnackbar(false, strings.error_network, null, null)
+        }
     }
 
     LaunchedEffect(passwordResetState) {
         when (passwordResetState) {
             AUTH_ERROR_NETWORK -> {
                 showResetPasswordDialog = false
-                onShowSnackbar(
-                    false,
-                    stringRes(strings.error_network, null),
-                    null
-                )
+                onShowSnackbar(false, strings.error_network, null, null)
             }
 
             AUTH_ERROR_USER_NOT_FOUND -> {
                 showResetPasswordDialog = false
-                onShowSnackbar(
-                    false,
-                    stringRes(strings.error_account_no_exists, null),
-                    null
-                )
+                onShowSnackbar(false, strings.error_account_no_exists, null, null)
             }
 
             -1 -> {
                 showResetPasswordDialog = false
-                onShowSnackbar(
-                    true,
-                    stringRes(strings.reset_email_sent, null),
-                    null
-                )
+                onShowSnackbar(true, strings.reset_email_sent, null, null)
             }
 
             null -> {}
@@ -153,43 +139,42 @@ fun LoginScreen(
     }
 
     //------------------------------- UI
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+    Surface(color = MaterialTheme.colorScheme.primary) {
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.SpaceEvenly) {
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = stringResource(strings.appName),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 48.sp
+                    )
+                )//Logo
 
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.SpaceEvenly) {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = stringRes(strings.appName, null),
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontSize = 48.sp
+                //Form and Button
+                LoginForm(
+                    !disableInputs,
+                    { showResetPasswordDialog = true },
+                    { email, password -> viewModel.login(email, password) },
+                    loginState
                 )
-            )//Logo
+            }
 
-            //Form and Button
-            LoginForm(
-                stringRes,
-                !disableInputs,
-                { showResetPasswordDialog = true },
-                login,
-                loginState
+            //Routing to Login
+            ClickableText(
+                modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
+                text = annotatedString,
+                style = MaterialTheme.typography.labelLarge.copy(color = Color.White),
+                onClick = { offset ->
+                    if (annotatedString.getStringAnnotations(offset, offset).isNotEmpty()) goRegister()
+                }
             )
         }
-
-        //Routing to Login
-        ClickableText(
-            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
-            text = annotatedString,
-            style = MaterialTheme.typography.labelLarge.copy(color = Color.White),
-            onClick = { offset ->
-                if (annotatedString.getStringAnnotations(offset, offset).isNotEmpty()) goRegister()
-            }
-        )
     }
 }
 
 @Composable
 private fun LoginForm(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     enable: Boolean,
     onResetPasswordClicked: () -> Unit,
     login: (String, String) -> Unit,
@@ -199,25 +184,19 @@ private fun LoginForm(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    val errors = remember { mutableStateMapOf<String, String>() }
+    val errors = remember { mutableStateMapOf<String, StringResource>() }
 
     //------------------------------- Effects
     LaunchedEffect(loginState) {
-        if (loginState != null)
-            when (loginState.errorCode) {
-                AUTH_ERROR_WRONG_EMAIL -> {
-                    errors["email"] = stringRes(strings.error_email_no_exists, null)
-                }
-
-                AUTH_ERROR_WRONG_PASSWORD -> {
-                    errors["password"] = stringRes(strings.error_password_wrong, null)
-                    errors["email"] = stringRes(strings.error_email_might_no_exists, null)
-                }
-
-                null -> {
-                    /* DO NOTHING */
-                }
+        when (loginState?.errorCode) {
+            AUTH_ERROR_WRONG_EMAIL -> errors["email"] = strings.error_email_no_exists
+            AUTH_ERROR_WRONG_PASSWORD -> {
+                errors["password"] = strings.error_password_wrong
+                errors["email"] = strings.error_email_might_no_exists
             }
+
+            null -> {}
+        }
     }
 
     //------------------------------- UI
@@ -230,15 +209,17 @@ private fun LoginForm(
             enabled = enable,
             placeholder = {
                 Text(
-                    text = stringRes(strings.email_placeholder, null),
+                    text = stringResource(strings.email_placeholder),
                     style = MaterialTheme.typography.labelSmall
                 )
             },
             isError = errors["email"] != null,
-            supportingText = { if (errors["email"] != null) Text(
-                text = errors["email"]!!,
-                style = MaterialTheme.typography.bodyMedium
-            ) },
+            supportingText = {
+                if (errors["email"] != null) Text(
+                    text = stringResource(errors["email"]!!),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
             value = email,
             onValueChange = { email = it },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
@@ -251,15 +232,17 @@ private fun LoginForm(
             textStyle = MaterialTheme.typography.labelSmall,
             placeholder = {
                 Text(
-                    text = stringRes(strings.password_placeholder, null),
+                    text = stringResource(strings.password_placeholder),
                     style = MaterialTheme.typography.labelSmall
                 )
             },
             isError = errors["password"] != null,
-            supportingText = { if (errors["password"] != null) Text(
-                text = errors["password"]!!,
-                style = MaterialTheme.typography.bodyMedium
-            ) },
+            supportingText = {
+                if (errors["password"] != null) Text(
+                    text = stringResource(errors["password"]!!),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
             value = password,
             onValueChange = { password = it },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -281,7 +264,7 @@ private fun LoginForm(
         ClickableText(
             modifier = Modifier.padding(end = 16.dp).align(Alignment.End),
             style = MaterialTheme.typography.labelLarge.copy(MaterialTheme.colorScheme.tertiary),
-            text = buildAnnotatedString { append(stringRes(strings.forgot_password, null)) },
+            text = buildAnnotatedString { append(stringResource(strings.forgot_password)) },
             onClick = { onResetPasswordClicked() }
         )
         FilledTonalButton(
@@ -290,17 +273,14 @@ private fun LoginForm(
             onClick = {
                 errors.clear()
                 //Validate Form
-                if (email.isBlank()) errors["email"] =
-                    stringRes(strings.error_email_required, null)
+                if (email.isBlank()) errors["email"] = strings.error_email_required
                 else if (!Regex("""^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}${'$'}""").matches(
                         email
                     )
                 )
-                    errors["email"] = stringRes(strings.error_email_invalid, null)
-                if (password.isBlank()) errors["password"] =
-                    stringRes(strings.error_password_required, null)
-                else if (password.length < 6) errors["password"] =
-                    stringRes(strings.error_password_weak, null)
+                    errors["email"] = strings.error_email_invalid
+                if (password.isBlank()) errors["password"] = strings.error_password_required
+                else if (password.length < 6) errors["password"] = strings.error_password_weak
 
                 //Register
                 if (errors.isEmpty()) login(email, password)
@@ -312,7 +292,7 @@ private fun LoginForm(
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
             Text(
-                stringRes(strings.login, null),
+                stringResource(strings.login),
                 style = MaterialTheme.typography.labelLarge
             )
         }

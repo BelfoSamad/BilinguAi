@@ -1,18 +1,15 @@
-package com.samadtch.bilinguai.screens.boarding
+package com.samadtch.bilinguai.ui.screens.boarding
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
 import com.samadtch.bilinguai.data.repositories.base.UserRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class BoardingViewModel @Inject constructor(
+class BoardingViewModel(
     private val configRepository: ConfigRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {

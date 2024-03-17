@@ -1,27 +1,29 @@
 package com.samadtch.bilinguai
 
-import android.content.Context
-import android.graphics.Rect
+import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
+import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.android.play.core.review.ReviewInfo
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.samadtch.bilinguai.databinding.ActivityMainBinding
-import com.samadtch.bilinguai.utilities.exceptions.DataException
+import com.samadtch.bilinguai.utilities.stringResource
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -37,15 +39,34 @@ class MainActivity : FragmentActivity() {
     /***********************************************************************************************
      * ************************* Declarations
      */
-    private var _binding: ActivityMainBinding? = null
-    private val binding get() = _binding!!
-
-    //Declarations
     @Inject
     lateinit var remoteConfig: FirebaseRemoteConfig
+
     //Loading
-    private val _loading = MutableStateFlow(true)
-    private val loading = _loading.asStateFlow()
+    private val _loaded = MutableStateFlow(true)
+    private val loaded = _loaded.asStateFlow()
+
+    //Ads
+    private var mInterstitialAd: InterstitialAd? = null
+    private val interstitialAdLoadCallback: InterstitialAdLoadCallback =
+        object : InterstitialAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d(TAG, adError.toString())
+                mInterstitialAd = null
+            }
+
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                Log.d(TAG, "Ad was loaded.")
+                mInterstitialAd = interstitialAd
+            }
+        }
+
+    //Package Info
+    private lateinit var packageInfo: PackageInfo
+
+    //Review
+    private lateinit var reviewManager: ReviewManager
+    private lateinit var reviewInfo: ReviewInfo
 
     //GDPR
     private var isMobileAdsInitializeCalled = AtomicBoolean(false)
@@ -57,28 +78,44 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Firebase.crashlytics.recordException(DataException(1))
+        //Splash Screen
+        installSplashScreen().apply { this.setKeepOnScreenCondition { loaded.value } }
 
-        //Splash Screen, TODO: Better Solution Later
-        installSplashScreen().apply {
-            lifecycleScope.launch { delay(1000); _loading.emit(false) }//Loading Delay
-            this.setKeepOnScreenCondition { loading.value }
+        //Initializations
+        remoteConfig.fetchAndActivate()//Remote Config
+        handleGDPR()//GDPR
+
+        //Get Package Info
+        try {
+            packageInfo = packageManager.getPackageInfo(packageName, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.d(TAG, "onCreate: " + e.message)
         }
 
-        //Init Activity
-        _binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        //Get Review Manager
+        reviewManager = ReviewManagerFactory.create(this)
+        val request = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                reviewInfo = task.result
+            }
+        }
 
-        //Fetch RemoteConfig
-        remoteConfig.fetchAndActivate().addOnCompleteListener {
-            Log.d(
-                "App - ",
-                "OnCreateActivity: Fetch Remote Configurations (${it.isSuccessful})"
+
+        //UI
+        setContent {
+            App(
+                stringRes = { res, args -> stringResource(this, res, args) },
+                onSplashScreenDone = { lifecycleScope.launch { _loaded.emit(false) } },
+                openWebPage = { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it))) },
+                getVersionName = { packageInfo.versionName },
+                reviewApp = { reviewManager.launchReviewFlow(this, reviewInfo) },
+                showInterstitialAd = {
+                    mInterstitialAd?.show(this)
+                    loadInterstitialAd()//Reload
+                }
             )
         }
-
-        //Init Ads and GDPR
-        handleGDPR()
     }
 
     private fun handleGDPR() {
@@ -110,6 +147,15 @@ class MainActivity : FragmentActivity() {
 
         // Initialize the Google Mobile Ads SDK.
         MobileAds.initialize(this)
+    }
+
+    private fun loadInterstitialAd() {
+        InterstitialAd.load(
+            this,
+            getString(R.string.INTERSTITIAL_AD_ID),
+            AdRequest.Builder().build(),
+            interstitialAdLoadCallback
+        )
     }
 
 }

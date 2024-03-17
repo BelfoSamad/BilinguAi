@@ -42,11 +42,11 @@ import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.theme.PrimaryTextFieldColors
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
 fun TextInputView(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     enable: Boolean,
     input: TextInput,
     onDataRequested: Boolean,
@@ -55,13 +55,13 @@ fun TextInputView(
 ) {
     //------------------------------- Declarations
     var value by rememberSaveable { mutableStateOf(input.defaultValue ?: "") }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var error by rememberSaveable { mutableStateOf<StringResource?>(null) }
 
     //------------------------------- Effect
     LaunchedEffect(onDataRequested) {
         if (onDataRequested) {
             if (value.isBlank()) {
-                error = stringRes(strings.error_required, listOf(input.label))
+                error = strings.error_required
                 valueFlow.emit(null)
             } else {
                 error = null
@@ -94,7 +94,7 @@ fun TextInputView(
             maxLines = input.lines ?: 1,
             supportingText = {
                 if (error != null) Text(
-                    error!!,
+                    stringResource(error!!, input.label),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -106,7 +106,6 @@ fun TextInputView(
 
 @Composable
 fun NumberInputView(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     enable: Boolean,
     input: NumberInput,
     onDataRequested: Boolean,
@@ -115,7 +114,7 @@ fun NumberInputView(
 ) {
     //------------------------------- Declarations
     var value by rememberSaveable { mutableStateOf(input.defaultValue ?: "") }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var error by rememberSaveable { mutableStateOf<StringResource?>(null) }
     //Data
     val onlyDigitsRegex = """^(?:${'$'}|[1-9]\d*${'$'})"""
     val negativeRegex = """^${'$'}|^(-?[1-9]\d*|0)${'$'}"""
@@ -126,13 +125,13 @@ fun NumberInputView(
     LaunchedEffect(onDataRequested) {
         if (onDataRequested) {
             if (value.isBlank()) {
-                error = stringRes(strings.error_required, listOf(input.label))
+                error = strings.error_required
                 valueFlow.emit(null)
             } else if (input.minValue != null && value.toDouble() < input.minValue!!) {
-                error = stringRes(strings.error_min, listOf(input.label, input.minValue!!))
+                error = strings.error_min
                 valueFlow.emit(null)
             } else if (input.maxValue != null && value.toDouble() > input.maxValue!!) {
-                error = stringRes(strings.error_max, listOf(input.label, input.maxValue!!))
+                error = strings.error_max
                 valueFlow.emit(null)
             } else {
                 error = null
@@ -162,11 +161,30 @@ fun NumberInputView(
             isError = error != null,
             supportingText = {
                 if (error != null) Text(
-                    text = error!!,
+                    text = when (error!!) {
+                        strings.error_required -> stringResource(
+                            strings.error_required,
+                            listOf(input.label)
+                        )
+
+                        strings.error_min -> stringResource(
+                            strings.error_min,
+                            input.label,
+                            input.minValue!!
+                        )
+
+                        else -> stringResource(
+                            strings.error_max,
+                            listOf(input.label, input.maxValue!!)
+                        )
+                    },
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
             value = value,
             onValueChange = {
                 //Check Decimal/Negative
@@ -222,7 +240,6 @@ fun CheckboxInputView(
 
 @Composable
 fun SelectionInputView(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     enable: Boolean,
     input: OptionsInput,
     onDataRequested: Boolean,
@@ -232,19 +249,19 @@ fun SelectionInputView(
     //------------------------------- Declarations
     val value = remember { mutableStateListOf<String>() }
     var expanded by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<StringResource?>(null) }
 
     //------------------------------- Effect
     LaunchedEffect(onDataRequested) {
         if (onDataRequested) {
             if (value.isEmpty()) {
-                error = stringRes(strings.error_required, listOf(input.label))
+                error = strings.error_required
                 valueFlow.emit(null)
             } else if (input.multiSelection && input.minSelection != null && value.size < input.minSelection) {
-                error = stringRes(strings.error_min_selection, listOf(input.minSelection))
+                error = strings.error_min_selection
                 valueFlow.emit(null)
             } else if (input.multiSelection && input.maxSelection != null && value.size > input.maxSelection) {
-                error = stringRes(strings.error_max_selection, listOf(input.maxSelection))
+                error = strings.error_max_selection
                 valueFlow.emit(null)
             } else {
                 error = null
@@ -322,7 +339,22 @@ fun SelectionInputView(
         }
         if (error != null) Text(
             modifier = Modifier.padding(16.dp, 2.dp),
-            text = error!!,
+            text = when (error!!) {
+                strings.error_required -> stringResource(
+                    strings.error_required,
+                    input.label
+                )
+
+                strings.error_min_selection -> stringResource(
+                    strings.error_min_selection,
+                    input.minSelection!!
+                )
+
+                else -> stringResource(
+                    strings.error_max_selection,
+                    input.maxSelection!!
+                )
+            },
             style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error)
         )
     }

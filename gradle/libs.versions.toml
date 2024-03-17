@@ -38,6 +38,7 @@ review = "2.0.1"
 ump = "2.2.0"
 ads = "23.0.0"
 buildKonfig = "0.15.1"
+precompose = "1.6.0-rc02"
 
 [libraries]
 buildKonfig = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildConfig" }
@@ -95,6 +96,11 @@ firebase-android-crashlytics = { module = "com.google.firebase:firebase-crashlyt
 
 # Coil
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+
+# Pre-Compose
+precompose-core = { module = "moe.tlaster:precompose", version.ref = "precompose" }
+precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
+precompose-koin = { module = "moe.tlaster:precompose-koin", version.ref = "precompose" }
 
 # Others
 kmm-viewmodel-core = { module = "com.rickclephas.kmm:kmm-viewmodel-core", version.ref = "kmm-viewmodel" }

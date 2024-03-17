@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.ui.screens
+package com.samadtch.bilinguai.ui.screens.home
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +66,7 @@ import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.common.CheckboxInputView
 import com.samadtch.bilinguai.ui.common.DefinitionDialog
+import com.samadtch.bilinguai.ui.common.DeleteAccountDialog
 import com.samadtch.bilinguai.ui.common.DeleteDataDialog
 import com.samadtch.bilinguai.ui.common.NumberInputView
 import com.samadtch.bilinguai.ui.common.SelectionInputView
@@ -74,20 +77,22 @@ import com.samadtch.bilinguai.ui.theme.PrimaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryIconButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryIconButtonColors
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
-import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
+import com.samadtch.bilinguai.utilities.exceptions.AuthException
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_LOGGED_OUT
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NOT_FOUND
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_SERVICE
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -113,46 +118,46 @@ data class GenerationUiState(
  */
 @Composable
 fun HomeScreen(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
-    onShowSnackbar: suspend (Boolean, String, String?) -> Boolean,
+    viewModel: HomeViewModel,
+    onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
     inputs: List<List<BaseInput>>,
     openDrawer: () -> Unit,
-    sendVerificationEmail: () -> Unit,
-    //Drawer Menu
+    showInterstitialAd: () -> Unit,
     logout: () -> Unit,
-    //States
-    uiState: DataUiState,
-    generationState: GenerationUiState?,
-    deleteState: Int?,
-    //Listeners
-    onSortChanged: (sort: Boolean) -> Unit,
-    onGenerateClicked: (data: Map<String, Any>, temperature: Float) -> Unit,
-    onDataDeleted: (dataId: String) -> Unit
 ) {
     //------------------------------- Declarations
     val coroutineScope = rememberCoroutineScope()
-    var sort by rememberSaveable { mutableStateOf(true) }
+
+    //States
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val generationState by viewModel.generationState.collectAsStateWithLifecycle()
+    val deletedState by viewModel.deletedState.collectAsStateWithLifecycle()
+
+    //Dialogs
+    var showDeleteDataDialog by rememberSaveable { mutableStateOf<String?>(null) }
+    var sortByDate by rememberSaveable { mutableStateOf(true) }
     var word by rememberSaveable { mutableStateOf<String?>(null) }
     var definition by rememberSaveable { mutableStateOf<String?>(null) }
-    var showDeleteDataDialog by rememberSaveable { mutableStateOf<String?>(null) }
 
     //------------------------------- Effects
     //Data State
     LaunchedEffect(uiState.errorCode) {
         if (uiState.errorCode != null) {
-            when (uiState.errorCode.split("::")[0]) {
+            when (uiState.errorCode!!.split("::")[0]) {
                 "AUTH" -> logout()
                 "DATA" -> {
-                    when (uiState.errorCode.split("::")[1].toInt()) {
+                    when (uiState.errorCode!!.split("::")[1].toInt()) {
                         DATA_ERROR_NETWORK -> onShowSnackbar(
                             false,
-                            stringRes(strings.error_network, null),
+                            strings.error_network,
+                            null,
                             null
                         )
 
                         DATA_ERROR_SERVICE -> onShowSnackbar(
                             false,
-                            stringRes(strings.error_server, null),
+                            strings.error_server,
+                            null,
                             null
                         )
                     }
@@ -163,115 +168,83 @@ fun HomeScreen(
 
     //Generation Error
     LaunchedEffect(generationState) {
-        if (generationState?.errorCode != null)
-            when (generationState.errorCode.split("::")[0]) {
+        if (generationState?.success == true) showInterstitialAd()
+        else if (generationState?.errorCode != null) {
+            when (generationState?.errorCode!!.split("::")[0]) {
                 "AUTH" -> logout()
                 "API" -> {
-                    when (generationState.errorCode.split("::")[1].toInt()) {
-                        API_ERROR_NETWORK -> onShowSnackbar(
+                    when (generationState?.errorCode!!.split("::")[1].toInt()) {
+                        DATA_ERROR_NETWORK -> onShowSnackbar(
                             false,
-                            stringRes(strings.error_network, null),
+                            strings.error_network,
+                            null,
                             null
                         )
 
-                        API_ERROR_AUTH -> onShowSnackbar(
-                            false,
-                            stringRes(strings.error_api_key, null),
-                            null
-                        )
-
+                        API_ERROR_AUTH -> onShowSnackbar(false, strings.error_api_key, null, null)
                         API_ERROR_RATE_LIMIT -> onShowSnackbar(
                             false,
-                            stringRes(strings.error_rate_limit, null),
+                            strings.error_rate_limit,
+                            null,
                             null
                         )
 
-                        API_ERROR_OTHER -> onShowSnackbar(
-                            false,
-                            stringRes(strings.error_api, null),
-                            null
-                        )
+                        API_ERROR_OTHER -> onShowSnackbar(false, strings.error_api, null, null)
                     }
                 }
 
                 "DATA" -> {
-                    when (generationState.errorCode.split("::")[1].toInt()) {
+                    when (generationState?.errorCode!!.split("::")[1].toInt()) {
                         DATA_ERROR_NETWORK -> onShowSnackbar(
                             false,
-                            stringRes(strings.error_network, null),
+                            strings.error_network,
+                            null,
                             null
                         )
 
-                        else -> onShowSnackbar(
-                            false,
-                            stringRes(strings.error_server, null),
-                            null
-                        )
+                        else -> onShowSnackbar(false, strings.error_server, null, null)
                     }
                 }
 
-                "VERIFICATION" -> {
-                    onShowSnackbar(
-                        false,
-                        stringRes(strings.error_verification, null),
-                        null
-                    )
-                }
+                "VERIFICATION" -> onShowSnackbar(false, strings.error_verification, null, null)
 
                 "COOLDOWN" -> {
                     //Show Snackbar
-                    var minutes = generationState.errorCode.split("::")[1]
-                        .toLong().toDuration(DurationUnit.SECONDS).inWholeMinutes
+                    var minutes = generationState?.errorCode!!.split("::")[1]
+                        .toLong()
+                        .toDuration(DurationUnit.SECONDS).inWholeMinutes
                     if (minutes > 60) {
-                        val hours = generationState.errorCode.split("::")[1]
-                            .toLong().toDuration(DurationUnit.SECONDS).inWholeHours
+                        val hours = generationState?.errorCode!!.split("::")[1]
+                            .toLong()
+                            .toDuration(DurationUnit.SECONDS).inWholeHours
                         minutes -= hours * 60
-                        onShowSnackbar(
-                            false,
-                            stringRes(strings.cooldown_hours, listOf(hours, minutes)),
-                            null
-                        )
-                    } else onShowSnackbar(
-                        false,
-                        stringRes(strings.cooldown_minutes, listOf(minutes)),
-                        null
-                    )
+                        onShowSnackbar(false, strings.cooldown_hours, listOf(hours, minutes), null)
+                    } else onShowSnackbar(false, strings.cooldown_minutes, listOf(minutes), null)
                 }
             }
+        }
     }
 
     //Deleted Error
-    LaunchedEffect(deleteState) {
-        when (deleteState) {
+    LaunchedEffect(deletedState) {
+        when (deletedState) {
             AUTH_ERROR_USER_LOGGED_OUT -> {
                 logout()
                 showDeleteDataDialog = null
             }
 
             DATA_ERROR_NETWORK -> {
-                onShowSnackbar(
-                    false,
-                    stringRes(strings.error_network, null),
-                    null
-                )
+                onShowSnackbar(false, strings.error_network, null, null)
                 showDeleteDataDialog = null
             }
 
             DATA_ERROR_SERVICE -> {
-                onShowSnackbar(
-                    false,
-                    stringRes(strings.error_server, null),
-                    null
-                )
+                onShowSnackbar(false, strings.error_server, null, null)
                 showDeleteDataDialog = null
             }
 
             DATA_ERROR_NOT_FOUND -> {
-                onShowSnackbar(
-                    false,
-                    stringRes(strings.error_server_not_found, null),
-                    null
-                )
+                onShowSnackbar(false, strings.error_server_not_found, null, null)
                 showDeleteDataDialog = null
             }
 
@@ -280,177 +253,182 @@ fun HomeScreen(
     }
 
     //------------------------------- Dialogs
-    //Word Dialog
     if (word != null) {
         DefinitionDialog(word = word!!, definition = definition!!, onDismiss = {
             word = null
             definition = null
         })
     }
-
-    if (showDeleteDataDialog != null) DeleteDataDialog(
-        stringRes,
-        id = showDeleteDataDialog!!,
-        deleteData = onDataDeleted,
-        deleteDataState = deleteState,
-        onDismiss = { if (deleteState != -99) showDeleteDataDialog = null }
-    )
+    if (showDeleteDataDialog != null) {
+        DeleteDataDialog(
+            id = showDeleteDataDialog!!,
+            deleteData = { viewModel.deleteData(it) },
+            deleteDataState = deletedState,
+            onDismiss = { if (deletedState != -99) showDeleteDataDialog = null }
+        )
+    }
 
     //------------------------------- UI
-    Column {
-        LazyColumn {
-
-            item {
-                //Top Section
-                Column(Modifier.background(color = MaterialTheme.colorScheme.tertiary)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(top = 28.dp, bottom = 18.dp),
-                            text = stringRes(strings.appName, null),
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        FilledTonalIconButton(
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            onClick = { openDrawer() },
-                            colors = PrimaryIconButtonColors()
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.primary
+    ) {
+        Column {
+            LazyColumn {
+                item {
+                    //Top Section
+                    Column(Modifier.background(color = MaterialTheme.colorScheme.tertiary)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = null
+                            Text(
+                                modifier = Modifier.padding(top = 28.dp, bottom = 18.dp),
+                                text = stringResource(strings.appName),
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                             )
-                        }
-                    }
-
-                    if (uiState.isVerified == false) ClickableText(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                            .border(
-                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                                CircleShape
-                            )
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 16.dp, horizontal = 12.dp),
-                        text = buildAnnotatedString {
-                            append(stringRes(strings.verification_steps, null))
-                            append("\n")
-                            withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
-                                append(stringRes(strings.resend_verification_email, null))
-                            }
-                        },
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 12.sp
-                        ),
-                        onClick = {
-                            sendVerificationEmail()
-                            coroutineScope.launch {
-                                onShowSnackbar(
-                                    true,
-                                    stringRes(strings.verification_email_sent, null),
-                                    null
+                            FilledTonalIconButton(
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                onClick = { openDrawer() },
+                                colors = PrimaryIconButtonColors()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = null
                                 )
                             }
                         }
-                    )
 
-                    //Dynamic Form
-                    DynamicForm(
-                        stringRes = stringRes,
-                        inputs = inputs,
-                        generationState = generationState,
-                        onGenerateClicked = onGenerateClicked
-                    )
-                }
-            }
-
-            item {
-                //Top Section
-                Row(
-                    modifier = Modifier.padding(8.dp, 8.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        text = stringRes(strings.generated_data, null),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    OutlinedButton(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        border = OutlinedButtonColors(),
-                        onClick = {
-                            sort = !sort
-                            onSortChanged(sort)
-                        }
-                    ) {
-                        Icon(
-                            modifier = Modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
-                                .align(Alignment.CenterVertically),
-                            imageVector = Icons.AutoMirrored.Filled.Sort,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            contentDescription = null
-                        )
-                        Text(
-                            text = if (sort) stringRes(strings.date, null) else stringRes(
-                                strings.name,
-                                null
+                        if (uiState.isVerified == false) ClickableText(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                                .border(
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                    CircleShape
+                                )
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 16.dp, horizontal = 12.dp),
+                            text = buildAnnotatedString {
+                                append(stringResource(strings.verification_steps))
+                                append("\n")
+                                withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                                    append(stringResource(strings.resend_verification_email))
+                                }
+                            },
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 12.sp
                             ),
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                color = MaterialTheme.colorScheme.secondary
+                            onClick = {
+                                viewModel.verifyEmail()
+                                coroutineScope.launch {
+                                    onShowSnackbar(
+                                        false,
+                                        strings.verification_email_sent,
+                                        null,
+                                        null
+                                    )
+                                }
+                            }
+                        )
+
+                        //Dynamic Form
+                        DynamicForm(
+                            inputs = inputs,
+                            generationState = generationState,
+                            onGenerateClicked = { inputs, temperature ->
+                                viewModel.generateData(
+                                    inputs,
+                                    temperature
+                                )
+                            }
+                        )
+                    }
+                }
+
+                item {
+                    //Top Section
+                    Row(
+                        modifier = Modifier.padding(8.dp, 8.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                            text = stringResource(strings.generated_data),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        OutlinedButton(
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                            border = OutlinedButtonColors(),
+                            onClick = {
+                                sortByDate = !sortByDate
+                                viewModel.sortData(sortByDate)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
+                                    .align(Alignment.CenterVertically),
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                contentDescription = null
                             )
+                            Text(
+                                text = if (sortByDate) stringResource(strings.date)
+                                else stringResource(strings.name),
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            )
+                        }
+                    }
+                }
+
+                //Data List
+                if (uiState.isLoading) {
+                    item { Box(shimmerModifier); Box(shimmerModifier); Box(shimmerModifier); }
+                } else if (uiState.errorCode == null) {
+                    items(
+                        items = uiState.data ?: listOf(),
+                        key = { it.dataId!! }
+                    ) {
+                        DataHolder(
+                            data = it,
+                            onDataDeleted = { id -> showDeleteDataDialog = id },
+                            onWordClicked = { w, d ->
+                                word = w
+                                definition = d
+                            }
                         )
                     }
                 }
             }
 
-            //Data List
-            if (uiState.isLoading) {
-                item { Box(shimmerModifier); Box(shimmerModifier); Box(shimmerModifier); }
-            } else if (uiState.errorCode == null) {
-                items(
-                    items = uiState.data ?: listOf(),
-                    key = { it.dataId!! }
+            //Error Situation
+            if (uiState.errorCode != null && uiState.errorCode == "DATA::32") {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).weight(1f),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    DataHolder(
-                        stringRes,
-                        data = it,
-                        onDataDeleted = { id -> showDeleteDataDialog = id },
-                        onWordClicked = { w, d ->
-                            word = w
-                            definition = d
-                        }
+                    Icon(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        imageVector = Icons.Default.ErrorOutline,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        contentDescription = null
+                    )
+                    Spacer(Modifier.padding(4.dp))
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        text = stringResource(strings.error_empty),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     )
                 }
-            }
-        }
 
-        //Error Situation
-        if (uiState.errorCode != null && uiState.errorCode == "DATA::32") {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    imageVector = Icons.Default.ErrorOutline,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    contentDescription = null
-                )
-                Spacer(Modifier.padding(4.dp))
-                Text(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = stringRes(strings.error_empty, null),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                )
             }
-
         }
     }
 
@@ -458,7 +436,6 @@ fun HomeScreen(
 
 @Composable
 fun DynamicForm(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     inputs: List<List<BaseInput>>,
     generationState: GenerationUiState?,
     onGenerateClicked: (data: Map<String, Any>, temperature: Float) -> Unit
@@ -497,7 +474,6 @@ fun DynamicForm(
         if (row.size == 1) {
             when (val input = row[0]) {
                 is TextInput -> TextInputView(
-                    stringRes,
                     !disableInputs,
                     input,
                     generateClicked,
@@ -505,7 +481,6 @@ fun DynamicForm(
                 )
 
                 is NumberInput -> NumberInputView(
-                    stringRes,
                     !disableInputs,
                     input,
                     generateClicked,
@@ -513,7 +488,6 @@ fun DynamicForm(
                 )
 
                 is OptionsInput -> SelectionInputView(
-                    stringRes,
                     !disableInputs,
                     input,
                     generateClicked,
@@ -532,7 +506,6 @@ fun DynamicForm(
             Row(Modifier.fillMaxWidth()) {
                 when (val input = row[0]) {
                     is TextInput -> TextInputView(
-                        stringRes,
                         !disableInputs,
                         input,
                         generateClicked,
@@ -541,7 +514,6 @@ fun DynamicForm(
                     )
 
                     is NumberInput -> NumberInputView(
-                        stringRes,
                         !disableInputs,
                         input,
                         generateClicked,
@@ -550,7 +522,6 @@ fun DynamicForm(
                     )
 
                     is OptionsInput -> SelectionInputView(
-                        stringRes,
                         !disableInputs,
                         input,
                         generateClicked,
@@ -570,7 +541,6 @@ fun DynamicForm(
                 Spacer(Modifier.padding(4.dp))
                 when (val input = row[1]) {
                     is TextInput -> TextInputView(
-                        stringRes,
                         !disableInputs,
                         input,
                         generateClicked,
@@ -579,7 +549,6 @@ fun DynamicForm(
                     )
 
                     is NumberInput -> NumberInputView(
-                        stringRes,
                         !disableInputs,
                         input,
                         generateClicked,
@@ -588,7 +557,6 @@ fun DynamicForm(
                     )
 
                     is OptionsInput -> SelectionInputView(
-                        stringRes,
                         !disableInputs,
                         input,
                         generateClicked,
@@ -618,7 +586,7 @@ fun DynamicForm(
             Row {
                 Text(
                     modifier = Modifier.padding(0.dp, 0.dp, 4.dp, 0.dp),
-                    text = stringRes(strings.temperature, listOf()),
+                    text = stringResource(strings.temperature),
                     style = MaterialTheme.typography.labelMedium.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 12.sp
@@ -627,9 +595,9 @@ fun DynamicForm(
                 Text(
                     text = sliderPosition.toString().split(".")[0] + "." + sliderPosition.toString()
                         .split(".")[1][0] + when (sliderPosition) {
-                        in 0f..0.3f -> " " + stringRes(strings.basic, null)
-                        in 0.3f..0.7f -> " " + stringRes(strings.normal, null)
-                        else -> " " + stringRes(strings.creative, null)
+                        in 0f..0.3f -> " " + stringResource(strings.basic)
+                        in 0.3f..0.7f -> " " + stringResource(strings.normal)
+                        else -> " " + stringResource(strings.creative)
                     },
                     style = MaterialTheme.typography.labelMedium.copy(
                         color = MaterialTheme.colorScheme.primary,
@@ -661,7 +629,7 @@ fun DynamicForm(
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
             Text(
-                stringRes(strings.generate, listOf()),
+                stringResource(strings.generate),
                 style = MaterialTheme.typography.labelLarge
             )
         }
@@ -670,18 +638,17 @@ fun DynamicForm(
 
 @Composable
 fun DataHolder(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     data: Data,
     onDataDeleted: (dataId: String) -> Unit,
     onWordClicked: (word: String, definition: String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     //Data Header
     Column(
         modifier = Modifier.animateContentSize(
             animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
+                dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium
             )
         )
     ) {
@@ -704,13 +671,11 @@ fun DataHolder(
                 val month = time.month.name
                 Text(
                     style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary),
-                    text = stringRes(
+                    text = stringResource(
                         strings.on_x,
-                        listOf(
-                            time.dayOfMonth,
-                            month[0] + month.substring(1).lowercase(),
-                            time.year
-                        )
+                        time.dayOfMonth,
+                        month[0] + month.substring(1).lowercase(),
+                        time.year
                     ),
                 )
             }

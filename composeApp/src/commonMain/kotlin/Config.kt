@@ -1,7 +1,7 @@
 import com.samadtch.bilinguai.models.pojo.inputs.BaseInput
 import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
-import com.samadtch.bilinguai.ui.screens.HypeMessage
+import com.samadtch.bilinguai.ui.screens.boarding.HypeMessage
 
 fun getInputs(): List<List<BaseInput>> {
     return listOf(

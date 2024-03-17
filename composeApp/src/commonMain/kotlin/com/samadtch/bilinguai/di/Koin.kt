@@ -8,7 +8,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
     modules(
         getNativeAppModule(),
         appModule,
-        dataModule
+        dataModule,
+        viewmodelModule
     )
 }
 

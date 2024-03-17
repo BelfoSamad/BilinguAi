@@ -1,29 +1,21 @@
-package com.samadtch.bilinguai.screens.home
+package com.samadtch.bilinguai.ui.screens.home
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
 import com.samadtch.bilinguai.data.repositories.base.DataRepository
 import com.samadtch.bilinguai.data.repositories.base.UserRepository
-import com.samadtch.bilinguai.ui.screens.DataUiState
-import com.samadtch.bilinguai.ui.screens.GenerationUiState
+import com.samadtch.bilinguai.utilities.exceptions.APIException
+import com.samadtch.bilinguai.utilities.exceptions.AuthException
+import com.samadtch.bilinguai.utilities.exceptions.DataException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.samadtch.bilinguai.utilities.exceptions.APIException
-import com.samadtch.bilinguai.utilities.exceptions.AuthException
-import com.samadtch.bilinguai.utilities.exceptions.DataException
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.datetime.Clock
-import javax.inject.Inject
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeViewModel(
     private val configRepository: ConfigRepository,
     private val dataRepository: DataRepository,
     private val userRepository: UserRepository
@@ -40,10 +32,6 @@ class HomeViewModel @Inject constructor(
     val generationState = _generationState.asStateFlow()
     private val _deletedState = MutableStateFlow<Int?>(null)
     val deletedState: StateFlow<Int?> = _deletedState.asStateFlow()
-    private val _deleteAccountState = MutableStateFlow<Int?>(null)
-    val deleteAccountState: StateFlow<Int?> = _deleteAccountState.asStateFlow()
-    private val _outState = MutableSharedFlow<Unit>()
-    val outState: SharedFlow<Unit> = _outState.asSharedFlow()
 
     /***********************************************************************************************
      * ************************* Methods
@@ -64,7 +52,6 @@ class HomeViewModel @Inject constructor(
                         else -> null
                     },
                     isVerified = userRepository.checkEmailVerified().getOrNull(),
-                    email = userRepository.getEmail().getOrNull(),
                     //Initially sorted by date
                     data = data.getOrNull()?.sortedByDescending { data -> data.createdAt }
                 )
@@ -72,14 +59,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getLinks() = configRepository.getAppDetails()
-
     fun sortData(byDate: Boolean) {
         sortByDate = byDate
         _uiState.update { state ->
             state.copy(
                 data = if (byDate) state.data?.sortedByDescending { it.createdAt }
-                else state.data?.sortedByDescending { it.topic }
+                else state.data?.sortedBy { it.topic }
             )
         }
     }
@@ -106,7 +91,8 @@ class HomeViewModel @Inject constructor(
                             is AuthException -> "AUTH::" + exception.code
                             is DataException -> "DATA::" + exception.code
                             else -> null
-                        }
+                        },
+                        success = response.isSuccess
                     )
                 }
 
@@ -131,7 +117,8 @@ class HomeViewModel @Inject constructor(
                     isLoading = false,
                     errorCode = "COOLDOWN::${
                         configRepository.getCooldown()?.minus(Clock.System.now().epochSeconds)
-                    }"
+                    }",
+                    success = false
                 )
             }
         }
@@ -160,25 +147,5 @@ class HomeViewModel @Inject constructor(
     }
 
     fun verifyEmail() = viewModelScope.launch { userRepository.verifyEmail() }
-
-    fun logout() = viewModelScope.launch {
-        userRepository.logout()
-        _outState.emit(Unit)
-    }
-
-    fun deleteAccount(password: String) {
-        viewModelScope.launch {
-            _deleteAccountState.emit(-99)//Loading State
-            try {
-                userRepository.deleteAccount(password)
-                _deleteAccountState.emit(-1)//End State
-                _outState.emit(Unit)//Logged Out
-            } catch (e: AuthException) {
-                _deleteAccountState.emit(e.code)//AUTH_ERROR_USER_NOT_FOUND and AUTH_ERROR_USER_WRONG_CREDENTIALS
-            } catch (e: DataException) {
-                _deleteAccountState.emit(e.code)//DATA_ERROR_OTHER
-            }
-        }
-    }
 
 }

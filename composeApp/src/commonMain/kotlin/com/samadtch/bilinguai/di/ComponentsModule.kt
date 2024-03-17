@@ -11,6 +11,10 @@ import com.samadtch.bilinguai.data.datasources.remote.base.getDataRemoteSource
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
 import com.samadtch.bilinguai.data.repositories.base.DataRepository
 import com.samadtch.bilinguai.data.repositories.base.UserRepository
+import com.samadtch.bilinguai.ui.screens.AppViewModel
+import com.samadtch.bilinguai.ui.screens.auth.AuthViewModel
+import com.samadtch.bilinguai.ui.screens.boarding.BoardingViewModel
+import com.samadtch.bilinguai.ui.screens.home.HomeViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -76,4 +80,11 @@ val dataModule = module {
         UserRepositoryImpl(get(), provideDispatcher())
         //FakeUserRepository()
     }
+}
+
+val viewmodelModule = module {
+    factory { AppViewModel(get(), get()) }
+    factory { BoardingViewModel(get(), get()) }
+    factory { HomeViewModel(get(), get(), get()) }
+    factory { AuthViewModel(get()) }
 }

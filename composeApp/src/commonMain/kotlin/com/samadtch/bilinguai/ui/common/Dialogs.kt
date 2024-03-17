@@ -44,6 +44,7 @@ import com.samadtch.bilinguai.ui.theme.SecondaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryTextFieldColors
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_WRONG_CREDENTIALS
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -79,7 +80,6 @@ fun DefinitionDialog(
 
 @Composable
 fun DeleteDataDialog(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     id: String,
     deleteData: (String) -> Unit,
     deleteDataState: Int?,
@@ -100,7 +100,7 @@ fun DeleteDataDialog(
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                     Text(
-                        stringRes(strings.delete, null),
+                        stringResource(strings.delete),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -110,7 +110,7 @@ fun DeleteDataDialog(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = stringRes(strings.delete_data, null),
+                text = stringResource(strings.delete_data),
                 style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.error)
             )
         },
@@ -118,7 +118,7 @@ fun DeleteDataDialog(
             Text(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 textAlign = TextAlign.Center,
-                text = stringRes(strings.delete_data_confirmation, null),
+                text = stringResource(strings.delete_data_confirmation),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp
                 )
@@ -217,14 +217,13 @@ fun CreditDialog(
 
 @Composable
 fun ForgotPasswordDialog(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     resetPassword: (String) -> Unit,
     resetPasswordState: Int?,
     onDismiss: () -> Unit = {},
 ) {
     //------------------------------- Declarations
     var email by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<StringResource?>(null) }
 
     AlertDialog(containerColor = MaterialTheme.colorScheme.primary,
         onDismissRequest = { onDismiss() },
@@ -235,13 +234,11 @@ fun ForgotPasswordDialog(
                     onClick = {
                         error = null
                         //Validate Form
-                        if (email.isBlank()) error =
-                            stringRes(strings.error_email_required, null)
+                        if (email.isBlank()) error = strings.error_email_required
                         else if (!Regex("""^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}${'$'}""").matches(
                                 email
                             )
-                        )
-                            error = stringRes(strings.error_email_invalid, null)
+                        ) error = strings.error_email_invalid
 
                         //Register
                         if (error == null) resetPassword(email)
@@ -253,7 +250,7 @@ fun ForgotPasswordDialog(
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                     Text(
-                        stringRes(strings.send, null),
+                        stringResource(strings.send),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -262,7 +259,7 @@ fun ForgotPasswordDialog(
         title = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringRes(strings.forgot_password, null),
+                text = stringResource(strings.forgot_password),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
             )
@@ -272,7 +269,7 @@ fun ForgotPasswordDialog(
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     textAlign = TextAlign.Center,
-                    text = stringRes(strings.forgot_password_explication, null),
+                    text = stringResource(strings.forgot_password_explication),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 14.sp
@@ -284,14 +281,14 @@ fun ForgotPasswordDialog(
                     textStyle = MaterialTheme.typography.labelSmall,
                     placeholder = {
                         Text(
-                            text = stringRes(strings.email_placeholder, null),
+                            text = stringResource(strings.email_placeholder),
                             style = MaterialTheme.typography.labelSmall
                         )
                     },
                     isError = error != null,
                     supportingText = {
                         if (error != null) Text(
-                            text = error!!,
+                            text = stringResource(error!!),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
@@ -304,7 +301,6 @@ fun ForgotPasswordDialog(
 
 @Composable
 fun DeleteAccountDialog(
-    stringRes: (id: StringResource, args: List<Any>?) -> String,
     deleteAccount: (String) -> Unit,
     deleteAccountState: Int?,
     onDismiss: () -> Unit = {},
@@ -312,12 +308,12 @@ fun DeleteAccountDialog(
     //------------------------------- Declarations
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<StringResource?>(null) }
 
     //------------------------------- Effects
     LaunchedEffect(deleteAccountState) {
         if (deleteAccountState == AUTH_ERROR_USER_WRONG_CREDENTIALS)
-            error = stringRes(strings.error_password_wrong, null)
+            error = strings.error_password_wrong
     }
 
     //------------------------------- UI
@@ -331,9 +327,9 @@ fun DeleteAccountDialog(
                         error = null
                         //Validate Form
                         if (password.isBlank())
-                            error = stringRes(strings.error_password_required, null)
+                            error = strings.error_password_required
                         else if (password.length < 6)
-                            error = stringRes(strings.error_password_weak, null)
+                            error = strings.error_password_weak
 
                         //Register
                         if (error == null) deleteAccount(password)
@@ -345,7 +341,7 @@ fun DeleteAccountDialog(
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                     Text(
-                        stringRes(strings.delete, null),
+                        text = stringResource(strings.delete),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -354,7 +350,7 @@ fun DeleteAccountDialog(
         title = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringRes(strings.delete_account, null),
+                text = stringResource(strings.delete_account),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.error)
             )
@@ -364,7 +360,7 @@ fun DeleteAccountDialog(
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     textAlign = TextAlign.Center,
-                    text = stringRes(strings.delete_account_explication, null),
+                    text = stringResource(strings.delete_account_explication),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp
                     )
@@ -374,14 +370,14 @@ fun DeleteAccountDialog(
                     colors = SecondaryTextFieldColors(),
                     placeholder = {
                         Text(
-                            text = stringRes(strings.password_placeholder, null),
+                            text = stringResource(strings.set_password_placeholder),
                             style = MaterialTheme.typography.labelSmall
                         )
                     },
                     isError = error != null,
                     supportingText = {
                         if (error != null) Text(
-                            text = error!!,
+                            text = stringResource(error!!),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
