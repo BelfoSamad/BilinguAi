@@ -15,6 +15,7 @@ import com.samadtch.bilinguai.ui.screens.home.HomeViewModel
 import dev.icerock.moko.resources.StringResource
 import getHypes
 import getInputs
+import kotlinx.coroutines.flow.StateFlow
 import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.NavOptions
@@ -30,6 +31,8 @@ fun Nav(
     onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
     openDrawer: () -> Unit,
     showInterstitialAd: () -> Unit,
+    speak: (String, String, Int) -> Boolean,
+    ttsState: Int?,
     //Login/Logout
     logoutState: Unit?,
     onLogin: () -> Unit,
@@ -150,6 +153,8 @@ fun Nav(
                 inputs = getInputs(),
                 openDrawer = openDrawer,
                 showInterstitialAd = showInterstitialAd,
+                speak = speak,
+                ttsState = ttsState,
                 logout = onLogout
             )
         }

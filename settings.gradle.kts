@@ -1,4 +1,4 @@
-rootProject.name = "BilinguAI"
+rootProject.name = "BilinguAi"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

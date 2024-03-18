@@ -44,6 +44,7 @@ import com.samadtch.bilinguai.utilities.exceptions.AuthException
 import com.samadtch.bilinguai.utilities.exceptions.DataException
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -62,6 +63,8 @@ fun App(
     getVersionName: () -> String,
     reviewApp: () -> Unit,
     showInterstitialAd: () -> Unit,
+    speak: (String, String, Int) -> Boolean,
+    ttsState: StateFlow<Int?>
 ) {
     PreComposeApp {
         //------------------------------- Declarations
@@ -77,6 +80,7 @@ fun App(
         val appState by viewModel.initUiState.collectAsStateWithLifecycle()
         val deleteAccountState by viewModel.deleteAccountState.collectAsStateWithLifecycle()
         val outState by viewModel.outState.collectAsStateWithLifecycle()
+        val tts by ttsState.collectAsStateWithLifecycle()
 
         //------------------------------- Effects
         //Delete Account
@@ -344,6 +348,8 @@ fun App(
                         },
                         openDrawer = { scope.launch { drawerState.open() } },
                         showInterstitialAd = showInterstitialAd,
+                        speak = speak,
+                        ttsState = tts,
                         //Login/Logout
                         logoutState = outState,
                         onLogin = { viewModel.refetchEmail() },

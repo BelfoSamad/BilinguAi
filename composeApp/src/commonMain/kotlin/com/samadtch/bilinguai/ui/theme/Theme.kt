@@ -25,7 +25,7 @@ fun AppTheme(
         darkColorScheme(
             primary = Color(0xFF151515),//Black
             secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFF8F9BFF),//Bright
+            tertiary = Color(0xFFFFCE00),//Bright
             error = Color(0xFFE74C3C),
             surfaceVariant = Color.Transparent,
         )
@@ -34,7 +34,7 @@ fun AppTheme(
         lightColorScheme(
             primary = Color(0xFF151515),//Black
             secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFF8F9BFF),//Bright
+            tertiary = Color(0xFFFFCE00),//Bright
             error = Color(0xFFE74C3C),
             surfaceVariant = Color.Transparent,
         )

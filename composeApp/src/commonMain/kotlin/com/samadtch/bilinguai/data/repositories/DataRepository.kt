@@ -73,7 +73,8 @@ class DataRepository(
                         topic = inputs["topic"] as String,
                         conversation = response.conversation,
                         vocabulary = response.vocabulary,
-                        Clock.System.now().epochSeconds
+                        translation = response.translation,
+                        createdAt = Clock.System.now().epochSeconds
                     )
 
                     //Insert on Db

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -27,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
@@ -57,11 +59,14 @@ fun DefinitionDialog(
     definition: String,
     onDismiss: () -> Unit = {},
 ) {
-    AlertDialog(containerColor = MaterialTheme.colorScheme.primary,
+    AlertDialog(
+        containerColor = MaterialTheme.colorScheme.primary,
         onDismissRequest = { onDismiss() },
         confirmButton = { /*Do Nothing*/ },
         title = {
             Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
                 text = word,
                 style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
             )
@@ -75,12 +80,61 @@ fun DefinitionDialog(
                     fontSize = 14.sp
                 )
             )
+        }
+    )
+}
+
+@Composable
+fun TranslationDialog(
+    message: String,
+    translation: String,
+    onDismiss: () -> Unit = {},
+) {
+    AlertDialog(containerColor = MaterialTheme.colorScheme.primary,
+        onDismissRequest = { onDismiss() },
+        confirmButton = { /*Do Nothing*/ },
+        title = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(strings.translation),
+                style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
+            )
+        },
+        text = {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Text(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                    textAlign = TextAlign.Center,
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 14.sp
+                    )
+                )
+                Icon(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    tint = MaterialTheme.colorScheme.secondary,
+                    imageVector = Icons.Default.Sync,
+                    contentDescription = null
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    textAlign = TextAlign.Center,
+                    text = translation,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 14.sp
+                    )
+                )
+            }
         })
 }
 
 @Composable
 fun DeleteDataDialog(
     id: String,
+    topic: String,
     deleteData: (String) -> Unit,
     deleteDataState: Int?,
     onDismiss: () -> Unit = {},
@@ -118,7 +172,7 @@ fun DeleteDataDialog(
             Text(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 textAlign = TextAlign.Center,
-                text = stringResource(strings.delete_data_confirmation),
+                text = stringResource(strings.delete_data_confirmation, topic),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp
                 )

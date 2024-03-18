@@ -28,7 +28,7 @@
     <string name="reset_email_sent">A password reset email has been sent.</string>
     <string name="forgot_password_explication">Request a password reset email and follow the link provided to reset your password.</string>
     <string name="delete_account_explication">Are you certain you wish to delete your account? If yes, please confirm by entering your password.</string>
-    <string name="delete_data_confirmation">Are you certain you wish to delete this conversation?</string>
+    <string name="delete_data_confirmation">Are you certain you wish to delete this conversation: "%1$s"?</string>
     <string name="cooldown_minutes">No more convo generations are available. Please wait for %1$d minutes.</string>
     <string name="cooldown_hours">No more convo generations are available. Please wait for %1$d hours and %2$d minutes.</string>
 
@@ -53,6 +53,7 @@
     <string name="basic">(Basic)</string>
     <string name="normal">(Normal)</string>
     <string name="creative">(Creative)</string>
+    <string name="translation">Translation</string>
 
     <!-- Sections -->
     <string name="generated_data">Conversations</string>
@@ -66,6 +67,7 @@
     <string name="on_x">On %1$d %2$s %3$d</string>
 
     <!-- Errors -->
+    <string name="error_tts">Text-to-speech error. Please try again later.</string>
     <string name="error_api_key">The API Key is invalid. To continue using our services, please update your app.</string>
     <string name="error_no_rewarded_ad">Unable to load Rewarded Ad. Please try again later.</string>
     <string name="error_account_no_exists">No account associated with this email address was found.</string>

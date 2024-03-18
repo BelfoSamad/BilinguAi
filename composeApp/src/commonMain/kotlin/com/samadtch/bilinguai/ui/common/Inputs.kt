@@ -355,7 +355,7 @@ fun SelectionInputView(
                     input.maxSelection!!
                 )
             },
-            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error)
+            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.primary)
         )
     }
 }

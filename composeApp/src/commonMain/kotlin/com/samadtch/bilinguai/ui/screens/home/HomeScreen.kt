@@ -21,16 +21,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
@@ -66,11 +69,11 @@ import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.common.CheckboxInputView
 import com.samadtch.bilinguai.ui.common.DefinitionDialog
-import com.samadtch.bilinguai.ui.common.DeleteAccountDialog
 import com.samadtch.bilinguai.ui.common.DeleteDataDialog
 import com.samadtch.bilinguai.ui.common.NumberInputView
 import com.samadtch.bilinguai.ui.common.SelectionInputView
 import com.samadtch.bilinguai.ui.common.TextInputView
+import com.samadtch.bilinguai.ui.common.TranslationDialog
 import com.samadtch.bilinguai.ui.common.shimmerModifier
 import com.samadtch.bilinguai.ui.theme.OutlinedButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryFilledButtonColors
@@ -79,7 +82,6 @@ import com.samadtch.bilinguai.ui.theme.SecondaryIconButtonColors
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
-import com.samadtch.bilinguai.utilities.exceptions.AuthException
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_LOGGED_OUT
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NOT_FOUND
@@ -123,6 +125,8 @@ fun HomeScreen(
     inputs: List<List<BaseInput>>,
     openDrawer: () -> Unit,
     showInterstitialAd: () -> Unit,
+    speak: (String, String, Int) -> Boolean,
+    ttsState: Int?,
     logout: () -> Unit,
 ) {
     //------------------------------- Declarations
@@ -135,9 +139,12 @@ fun HomeScreen(
 
     //Dialogs
     var showDeleteDataDialog by rememberSaveable { mutableStateOf<String?>(null) }
+    var topicToDelete by rememberSaveable { mutableStateOf<String?>(null) }
     var sortByDate by rememberSaveable { mutableStateOf(true) }
     var word by rememberSaveable { mutableStateOf<String?>(null) }
     var definition by rememberSaveable { mutableStateOf<String?>(null) }
+    var message by rememberSaveable { mutableStateOf<String?>(null) }
+    var translation by rememberSaveable { mutableStateOf<String?>(null) }
 
     //------------------------------- Effects
     //Data State
@@ -231,24 +238,31 @@ fun HomeScreen(
             AUTH_ERROR_USER_LOGGED_OUT -> {
                 logout()
                 showDeleteDataDialog = null
+                topicToDelete = null
             }
 
             DATA_ERROR_NETWORK -> {
                 onShowSnackbar(false, strings.error_network, null, null)
                 showDeleteDataDialog = null
+                topicToDelete = null
             }
 
             DATA_ERROR_SERVICE -> {
                 onShowSnackbar(false, strings.error_server, null, null)
                 showDeleteDataDialog = null
+                topicToDelete = null
             }
 
             DATA_ERROR_NOT_FOUND -> {
                 onShowSnackbar(false, strings.error_server_not_found, null, null)
                 showDeleteDataDialog = null
+                topicToDelete = null
             }
 
-            null -> showDeleteDataDialog = null
+            null -> {
+                showDeleteDataDialog = null
+                topicToDelete = null
+            }
         }
     }
 
@@ -259,9 +273,16 @@ fun HomeScreen(
             definition = null
         })
     }
+    if (message != null) {
+        TranslationDialog(message = message!!, translation = translation!!, onDismiss = {
+            message = null
+            translation = null
+        })
+    }
     if (showDeleteDataDialog != null) {
         DeleteDataDialog(
             id = showDeleteDataDialog!!,
+            topic = topicToDelete!!,
             deleteData = { viewModel.deleteData(it) },
             deleteDataState = deletedState,
             onDismiss = { if (deletedState != -99) showDeleteDataDialog = null }
@@ -326,7 +347,7 @@ fun HomeScreen(
                                 viewModel.verifyEmail()
                                 coroutineScope.launch {
                                     onShowSnackbar(
-                                        false,
+                                        true,
                                         strings.verification_email_sent,
                                         null,
                                         null
@@ -395,11 +416,21 @@ fun HomeScreen(
                         key = { it.dataId!! }
                     ) {
                         DataHolder(
+                            onShowSnackbar,
                             data = it,
-                            onDataDeleted = { id -> showDeleteDataDialog = id },
+                            onDataDeleted = { id, topic ->
+                                showDeleteDataDialog = id
+                                topicToDelete = topic
+                            },
+                            speak = speak,
+                            ttsState = ttsState,
                             onWordClicked = { w, d ->
                                 word = w
                                 definition = d
+                            },
+                            onTranslateClicked = { m, t ->
+                                message = m
+                                translation = t
                             }
                         )
                     }
@@ -510,7 +541,7 @@ fun DynamicForm(
                         input,
                         generateClicked,
                         dataFlow[flattenedIndex],
-                        Modifier.weight(1.25f).align(Alignment.CenterVertically)
+                        Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
 
                     is NumberInput -> NumberInputView(
@@ -638,9 +669,13 @@ fun DynamicForm(
 
 @Composable
 fun DataHolder(
+    onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
     data: Data,
-    onDataDeleted: (dataId: String) -> Unit,
-    onWordClicked: (word: String, definition: String) -> Unit
+    onDataDeleted: (dataId: String, topic: String) -> Unit,
+    speak: (String, String, Int) -> Boolean,
+    ttsState: Int?,
+    onWordClicked: (word: String, definition: String) -> Unit,
+    onTranslateClicked: (message: String, translation: String) -> Unit
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
@@ -682,7 +717,7 @@ fun DataHolder(
             Row(Modifier.align(Alignment.CenterVertically)) {
                 IconButton(
                     colors = SecondaryIconButtonColors(),
-                    onClick = { expanded = !expanded }
+                    onClick = { if (ttsState == null) expanded = !expanded }
                 ) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -691,9 +726,7 @@ fun DataHolder(
                 }
                 IconButton(
                     colors = SecondaryIconButtonColors(),
-                    onClick = {
-                        onDataDeleted(data.dataId!!)
-                    }
+                    onClick = { if (ttsState == null) onDataDeleted(data.dataId!!, data.topic) }
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
                 }
@@ -701,20 +734,27 @@ fun DataHolder(
         }
         if (expanded) {
             Spacer(Modifier.padding(4.dp))
-            DataContent(data, onWordClicked)
+            DataContent(onShowSnackbar, data, onWordClicked, onTranslateClicked, speak, ttsState)
         }
     }
 
 }
 
 @Composable
-fun DataContent(data: Data, onWordClicked: (word: String, definition: String) -> Unit) {
+fun DataContent(
+    onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
+    data: Data,
+    onWordClicked: (word: String, definition: String) -> Unit,
+    onTranslateClicked: (message: String, translation: String) -> Unit,
+    speak: (String, String, Int) -> Boolean,
+    ttsState: Int?
+) {
     Column(Modifier.fillMaxWidth()) {
         data.conversation.forEachIndexed { index, item ->
             Row(
                 modifier = Modifier.padding(
-                    start = if (index % 2 != 0) 32.dp else 0.dp,
-                    end = if (index % 2 == 0) 32.dp else 0.dp,
+                    start = if (index % 2 != 0) 16.dp else 0.dp,
+                    end = if (index % 2 == 0) 16.dp else 0.dp,
                 ).fillMaxWidth(),
                 horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End
             ) {
@@ -737,18 +777,88 @@ fun DataContent(data: Data, onWordClicked: (word: String, definition: String) ->
                         }
                     }
                 }
-                ClickableText(modifier = Modifier.border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = MaterialTheme.shapes.large
-                ).padding(16.dp),
+                if (index % 2 == 1) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        colors = IconButtonDefaults.outlinedIconButtonColors(
+                            contentColor = if (ttsState == index) MaterialTheme.colorScheme.tertiary
+                            else MaterialTheme.colorScheme.secondary
+                        ),
+                        onClick = {
+                            if (!speak(item, data.language, index)) onShowSnackbar(
+                                false,
+                                strings.error_tts,
+                                null,
+                                null
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.VolumeUp,
+                            contentDescription = null
+                        )
+                    }
+                    if (data.translation != null) IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        colors = SecondaryIconButtonColors(),
+                        onClick = { onTranslateClicked(item, data.translation[index]) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                ClickableText(
+                    modifier = Modifier
+                        .weight(1f)
+                        .border(
+                            width = 1.dp,
+                            color = if (ttsState == index) MaterialTheme.colorScheme.tertiary
+                            else MaterialTheme.colorScheme.secondary,
+                            shape = MaterialTheme.shapes.large
+                        ).padding(16.dp),
                     text = annotatedString,
                     style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
                     onClick = { offset ->
                         annotatedString.getStringAnnotations(offset, offset).forEach {
                             onWordClicked(it.item, data.vocabulary[it.item]!!)
                         }
-                    })
+                    }
+                )
+                if (index % 2 == 0) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        colors = IconButtonDefaults.outlinedIconButtonColors(
+                            contentColor = if (ttsState == index) MaterialTheme.colorScheme.tertiary
+                            else MaterialTheme.colorScheme.secondary
+                        ),
+                        onClick = {
+                            if (!speak(item, data.language, index)) onShowSnackbar(
+                                false,
+                                strings.error_tts,
+                                null,
+                                null
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.VolumeUp,
+                            contentDescription = null
+                        )
+                    }
+                    if (data.translation != null) IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        colors = SecondaryIconButtonColors(),
+                        onClick = { onTranslateClicked(item, data.translation[index]) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = null
+                        )
+                    }
+                }
             }
             Spacer(Modifier.padding(8.dp))
         }

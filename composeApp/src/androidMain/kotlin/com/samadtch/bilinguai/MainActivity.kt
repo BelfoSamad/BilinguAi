@@ -5,6 +5,9 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeech.SUCCESS
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -27,6 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -72,6 +76,10 @@ class MainActivity : FragmentActivity() {
     private var isMobileAdsInitializeCalled = AtomicBoolean(false)
     private lateinit var consentInformation: ConsentInformation
 
+    //Text To Speech
+    private lateinit var tts: TextToSpeech
+    private val state = MutableStateFlow<Int?>(null)
+
     /***********************************************************************************************
      * ************************* LifeCycle
      */
@@ -84,6 +92,7 @@ class MainActivity : FragmentActivity() {
         //Initializations
         remoteConfig.fetchAndActivate()//Remote Config
         handleGDPR()//GDPR
+        tts = TextToSpeech(this) { _ -> }//Init TTS
 
         //Get Package Info
         try {
@@ -101,7 +110,6 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-
         //UI
         setContent {
             App(
@@ -113,7 +121,33 @@ class MainActivity : FragmentActivity() {
                 showInterstitialAd = {
                     mInterstitialAd?.show(this)
                     loadInterstitialAd()//Reload
-                }
+                },
+                speak = { text, locale, index ->
+                    tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                        override fun onDone(utteranceId: String?) {
+                            lifecycleScope.launch { state.emit(null) }
+                        }
+
+                        override fun onStart(utteranceId: String?) {
+                            lifecycleScope.launch { state.emit(index) }
+                        }
+
+                        @Deprecated("Deprecated in Java")
+                        override fun onError(utteranceId: String?) {}
+                    })
+                    tts.setLanguage(
+                        Locale(
+                            when (locale) {
+                                "English" -> "en"
+                                "French" -> "fr"
+                                "Italian" -> "it"
+                                else -> "es"
+                            }
+                        )
+                    )
+                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "bilinguai") == SUCCESS
+                },
+                ttsState = state
             )
         }
     }

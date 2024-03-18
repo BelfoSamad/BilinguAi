@@ -25,7 +25,7 @@
     <!-- Generation Base Details -->
     <entry>
         <key>LLM_PROMPT</key>
-        <value>Generate a conversation between 2 people in {{language}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation and contains only the messages without the names of the senders) and a map of vocabulary from that conversation (only hardest words) which contains the word as key and the definition as value</value>
+        <value>Generate a conversation between 2 people in {{language}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation and contains only the messages without the names of the senders) and a map of vocabulary from that conversation (only hard interesting words) which contains the word as key and the definition (in english) as value. If the language is not english, the json should contain also a list of the messages translated into english (named translation)</value>
     </entry>
     <entry>
         <key>LLM_URL</key>
