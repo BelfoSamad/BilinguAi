@@ -11,33 +11,31 @@ import com.samadtch.bilinguai.utilities.exceptions.DataException
 
 class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSource {
 
-    override suspend fun insertData(userId: String, data: Data): String? {
-        return try {
-            db.collection("users").document(userId).collection("data")
-                .add(data.javaClass.declaredFields.filter { field ->
-                    field.isAccessible = true
-                    field.get(data) != null
-                }.associate { field -> field.name to field.get(data) }).await().id
-        } catch (e: FirebaseFirestoreException) {
-            DataException.handleError(e.code.ordinal)
-            null
-        }
+    override suspend fun insertData(userId: String, data: Data) = try {
+        db.collection("users").document(userId).collection("data")
+            .add(data.javaClass.declaredFields.filter { field ->
+                field.isAccessible = true
+                field.get(data) != null
+            }.associate { field -> field.name to field.get(data) }).await().id
+    } catch (e: FirebaseFirestoreException) {
+        if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
+            Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
+        DataException.handleError(e.code.ordinal)
+        null
     }
 
-    override suspend fun getData(userId: String): List<Data> {
-        return try {
-            db.collection("users").document(userId).collection("data").get()
-                .await().documents.map {
-                    val data = it.toObject(Data::class.java)!!
-                    data.copy(dataId = it.id)
-                }
-        } catch (e: FirebaseFirestoreException) {
-            if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
-                Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
-            //Handle Exception
-            DataException.handleError(e.code.ordinal)
-            listOf() // Return empty list
-        }
+    override suspend fun getData(userId: String) = try {
+        db.collection("users").document(userId).collection("data").get()
+            .await().documents.map {
+                val data = it.toObject(Data::class.java)!!
+                data.copy(dataId = it.id)
+            }
+    } catch (e: FirebaseFirestoreException) {
+        if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
+            Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
+        //Handle Exception
+        DataException.handleError(e.code.ordinal)
+        listOf() // Return empty list
     }
 
     override suspend fun deleteData(userId: String, dataId: String) {
@@ -45,6 +43,8 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
             db.collection("users").document(userId).collection("data").document(dataId).delete()
                 .await()
         } catch (e: FirebaseFirestoreException) {
+            if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
+                Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
             DataException.handleError(e.code.ordinal)
         }
     }

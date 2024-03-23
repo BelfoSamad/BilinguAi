@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.samadtch.bilinguai.utilities.exceptions.AuthException
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_EMAIL_ALREADY_IN_USE
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_INVALID_EMAIL
@@ -28,14 +29,18 @@ import org.koin.dsl.module
 
 class AuthRemoteSourceAndroid(
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val config: FirebaseRemoteConfig
 ) : AuthRemoteSource {
 
     override suspend fun register(email: String, password: String) = try {
         val user = auth.createUserWithEmailAndPassword(email, password)
             .await().user!!
         user.sendEmailVerification().await()
-        db.collection("users").document(user.uid).set(mapOf<String, String>()).await()
+        db.collection("users").document(user.uid).set(mapOf<String, Any?>(
+            "cooldown" to null,
+            "remaining" to config.getLong("GENERATIONS_COUNT").toInt()
+        )).await()
         //Return Id
         Result.success(user.uid)
     } catch (e: FirebaseNetworkException) {
@@ -158,5 +163,5 @@ class AuthRemoteSourceAndroid(
 }
 
 actual fun getAuthRemoteSource() = module {
-    single<AuthRemoteSource> { AuthRemoteSourceAndroid(get(), get()) }
+    single<AuthRemoteSource> { AuthRemoteSourceAndroid(get(), get(), get()) }
 }

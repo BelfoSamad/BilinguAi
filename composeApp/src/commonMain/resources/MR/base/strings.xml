@@ -67,6 +67,7 @@
     <string name="on_x">On %1$d %2$s %3$d</string>
 
     <!-- Errors -->
+    <string name="error_generation">Sorry, Can\'t generate a conversation based on your input. Please try again with a different topic.</string>
     <string name="error_tts">Text-to-speech error. Please try again later.</string>
     <string name="error_api_key">The API Key is invalid. To continue using our services, please update your app.</string>
     <string name="error_no_rewarded_ad">Unable to load Rewarded Ad. Please try again later.</string>

@@ -78,7 +78,7 @@ fun TextInputView(
             style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
         )
         TextField(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(0.dp, 4.dp, 0.dp, 0.dp),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(top = 4.dp),
             colors = PrimaryTextFieldColors(),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             enabled = enable,
@@ -142,13 +142,13 @@ fun NumberInputView(
     }
 
     //------------------------------- UI
-    Column(modifier.padding(16.dp, 4.dp)) {
+    Column(modifier.padding(16.dp, 8.dp)) {
         Text(
             text = input.label,
             style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
         )
         TextField(
-            modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp).fillMaxWidth(),
+            modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
             colors = PrimaryTextFieldColors(),
             enabled = enable,
             textStyle = MaterialTheme.typography.labelSmall,
@@ -272,10 +272,15 @@ fun SelectionInputView(
     }
 
     //------------------------------- UI
-    Column(modifier.padding(16.dp, 4.dp)) {
+    Column(modifier.padding(16.dp, 8.dp)) {
+        Text(
+            text = input.label,
+            style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 4.dp)
                 .clickable(onClick = { if (enable) expanded = true })
                 .border(BorderStroke(1.dp, MaterialTheme.colorScheme.primary), CircleShape)
                 .padding(8.dp),
@@ -283,7 +288,7 @@ fun SelectionInputView(
         ) {
             Text(
                 modifier = Modifier.padding(start = 8.dp).align(Alignment.CenterVertically),
-                text = input.label + if (value.isNotEmpty()) ": ${value.size}" else "",
+                text = input.hint + if (value.isNotEmpty()) ": ${value.size}" else "",
                 style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
             )
             Icon(

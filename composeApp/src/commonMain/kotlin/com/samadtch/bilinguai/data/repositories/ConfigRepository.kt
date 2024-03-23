@@ -1,15 +1,17 @@
 package com.samadtch.bilinguai.data.repositories
 
 import com.samadtch.bilinguai.data.datasources.local.AppPrefDataSource
-import com.samadtch.bilinguai.data.datasources.local.UserPrefDataSource
+import com.samadtch.bilinguai.data.datasources.remote.base.AuthRemoteSource
 import com.samadtch.bilinguai.data.datasources.remote.base.ConfigRemoteSource
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
+import com.samadtch.bilinguai.data.repositories.base.GenerationState
 import com.samadtch.bilinguai.di.Dispatcher
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 
 class ConfigRepository(
     private val appPrefDataSource: AppPrefDataSource,
-    private val userPrefDataSource: UserPrefDataSource,
+    private val authRemoteSource: AuthRemoteSource,
     private val configDataSource: ConfigRemoteSource,
     private val dispatcher: Dispatcher
 ) : ConfigRepository {
@@ -28,22 +30,18 @@ class ConfigRepository(
         "developer" to configDataSource.getStringConfig("DEVELOPER_ID")
     )
 
-    override fun getBaseCooldown() = configDataSource.getLongConfig("BASE_COOLDOWN")
-
-    override suspend fun getCooldown() = userPrefDataSource.getCooldownTimestamp()
-
-    override suspend fun setCooldown(timestamp: Long) {
-        userPrefDataSource.setCooldownTimestamp(timestamp)
+    override suspend fun getGenerationState(): Result<GenerationState> {
+        return configDataSource.getGenerationState(authRemoteSource.getUserId().getOrNull())
     }
 
-    override suspend fun generationsRemaining() = (userPrefDataSource.getRemaining()
-        ?: configDataSource.getLongConfig("GENERATIONS_COUNT").toInt()) > 0
 
-    override suspend fun dropRemaining() {
-        val remaining = if (userPrefDataSource.getRemaining() == null)
-            configDataSource.getLongConfig("GENERATIONS_COUNT").toInt()
-        else userPrefDataSource.getRemaining()!!
-        userPrefDataSource.setRemaining(remaining - 1)
+    override suspend fun handleGenerationState(current: Int) {
+        configDataSource.setGenerationState(
+            authRemoteSource.getUserId().getOrNull(),
+            Clock.System.now().epochSeconds + configDataSource.getLongConfig("BASE_COOLDOWN"),
+            (if (current == 0) configDataSource.getLongConfig("GENERATIONS_COUNT").toInt()
+            else current) - 1,
+        )
     }
 
 }

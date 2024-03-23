@@ -109,9 +109,8 @@ kotlin {
             implementation(libs.precompose.koin)
 
             //Others
-            api(libs.kmm.viewmodel.core)//KMM-ViewModel
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.coil.compose)//Coil
-            implementation(libs.jsonpathkt)
             implementation(libs.koin.core)//Koin
             implementation(libs.datastore)//DataStore
             implementation(libs.kotlin.datetime)//DateTime

@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
+import java.util.Random
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -101,7 +103,7 @@ class MainActivity : FragmentActivity() {
             Log.d(TAG, "onCreate: " + e.message)
         }
 
-        //Get Review Manager
+        //Get Review Manager TODO: Put in Method
         reviewManager = ReviewManagerFactory.create(this)
         val request = reviewManager.requestReviewFlow()
         request.addOnCompleteListener { task ->
@@ -127,25 +129,20 @@ class MainActivity : FragmentActivity() {
                         override fun onDone(utteranceId: String?) {
                             lifecycleScope.launch { state.emit(null) }
                         }
-
                         override fun onStart(utteranceId: String?) {
                             lifecycleScope.launch { state.emit(index) }
                         }
-
                         @Deprecated("Deprecated in Java")
                         override fun onError(utteranceId: String?) {}
                     })
-                    tts.setLanguage(
-                        Locale(
-                            when (locale) {
+                    tts.setLanguage(Locale(when (locale) {
+                                "Arabic" -> "ar"
                                 "English" -> "en"
                                 "French" -> "fr"
                                 "Italian" -> "it"
                                 else -> "es"
-                            }
-                        )
-                    )
-                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "bilinguai") == SUCCESS
+                            }))
+                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString()) == SUCCESS
                 },
                 ttsState = state
             )

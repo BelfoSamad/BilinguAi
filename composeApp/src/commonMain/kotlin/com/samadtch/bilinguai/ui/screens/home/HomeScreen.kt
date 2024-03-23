@@ -80,6 +80,7 @@ import com.samadtch.bilinguai.ui.theme.PrimaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryIconButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryIconButtonColors
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_GENERATION
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_LOGGED_OUT
@@ -192,6 +193,13 @@ fun HomeScreen(
                         API_ERROR_RATE_LIMIT -> onShowSnackbar(
                             false,
                             strings.error_rate_limit,
+                            null,
+                            null
+                        )
+
+                        API_ERROR_GENERATION -> onShowSnackbar(
+                            false,
+                            strings.error_generation,
                             null,
                             null
                         )
@@ -753,8 +761,8 @@ fun DataContent(
         data.conversation.forEachIndexed { index, item ->
             Row(
                 modifier = Modifier.padding(
-                    start = if (index % 2 != 0) 16.dp else 0.dp,
-                    end = if (index % 2 == 0) 16.dp else 0.dp,
+                    start = if (index % 2 != 0) 16.dp else 8.dp,
+                    end = if (index % 2 == 0) 16.dp else 8.dp,
                 ).fillMaxWidth(),
                 horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End
             ) {
@@ -793,7 +801,11 @@ fun DataContent(
                             )
                         }
                     ) {
-                        Icon(
+                        if (ttsState == index) CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.CenterVertically).size(28.dp),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ) else Icon(
                             imageVector = Icons.AutoMirrored.Default.VolumeUp,
                             contentDescription = null
                         )
@@ -843,7 +855,11 @@ fun DataContent(
                             )
                         }
                     ) {
-                        Icon(
+                        if (ttsState == index) CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.CenterVertically).size(28.dp),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ) else Icon(
                             imageVector = Icons.AutoMirrored.Default.VolumeUp,
                             contentDescription = null
                         )

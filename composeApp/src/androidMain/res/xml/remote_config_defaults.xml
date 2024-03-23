@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DefaultMap>
+    <!-- TODO: Update Links -->
     <!-- Base Links -->
     <entry>
         <key>PRIVACY_POLICY_LINK</key>
@@ -25,7 +26,8 @@
     <!-- Generation Base Details -->
     <entry>
         <key>LLM_PROMPT</key>
-        <value>Generate a conversation between 2 people in {{language}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation and contains only the messages without the names of the senders) and a map of vocabulary from that conversation (only hard interesting words) which contains the word as key and the definition (in english) as value. If the language is not english, the json should contain also a list of the messages translated into english (named translation)</value>
+        <value>Generate a conversation between 2 people in {{foreign}} about {{topic}}, return the data as json that contains a list of all the messages as a strings list (named conversation and contains only the messages without the names of the senders) and a map of vocabulary from that conversation (only hard interesting words) which contains the word as key and the definition (in
+            {{native}}) as value. If the language is not {{native}}, the json should contain also a list of the messages translated into {{native}} (named translation)</value>
     </entry>
     <entry>
         <key>LLM_URL</key>

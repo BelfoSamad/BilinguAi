@@ -75,51 +75,61 @@ class HomeViewModel(
             _generationState.emit(GenerationUiState())
 
             //Generate Data
-            if (userRepository.checkEmailVerified().getOrNull() == false) _generationState.update {
-                it?.copy(isLoading = false, errorCode = "VERIFICATION")
-            } else if (
-                configRepository.generationsRemaining() ||
-                (configRepository.getCooldown()?.minus(Clock.System.now().epochSeconds) ?: -1) < 0
-            ) {
-                val response = dataRepository.generateData(inputs, temperature)
-                val exception = response.exceptionOrNull()
-                _generationState.update {
-                    GenerationUiState(
-                        isLoading = false,
-                        errorCode = when (exception) {
-                            is APIException -> "API::" + exception.code
-                            is AuthException -> "AUTH::" + exception.code
-                            is DataException -> "DATA::" + exception.code
-                            else -> null
-                        },
-                        success = response.isSuccess
-                    )
-                }
-
-                //If Successful, subtract credit and change data
-                if (response.isSuccess) {
-                    //Add Data to UiState
-                    _uiState.update { state ->
-                        val newData = state.data?.toMutableList() ?: mutableListOf()
-                        newData.add(response.getOrNull()!!)
-                        state.copy(
-                            errorCode = null,
-                            //List Re-Sorted
-                            data = if (sortByDate) newData.sortedByDescending { it.createdAt }
-                            else newData.sortedBy { it.topic },
+            try {
+                val gState = configRepository.getGenerationState().getOrThrow()
+                if (userRepository.checkEmailVerified()
+                        .getOrNull() == false
+                ) _generationState.update {
+                    it?.copy(isLoading = false, errorCode = "VERIFICATION")
+                } else if (
+                    gState.remaining > 0 || (gState.cooldown?.minus(Clock.System.now().epochSeconds)
+                        ?: -1) < 0
+                ) {
+                    val response = dataRepository.generateData(inputs, temperature)
+                    val exception = response.exceptionOrNull()
+                    _generationState.update {
+                        GenerationUiState(
+                            isLoading = false,
+                            errorCode = when (exception) {
+                                is APIException -> "API::" + exception.code
+                                is AuthException -> "AUTH::" + exception.code
+                                is DataException -> "DATA::" + exception.code
+                                else -> null
+                            },
+                            success = response.isSuccess
                         )
                     }
-                    configRepository.dropRemaining()
-                    configRepository.setCooldown(Clock.System.now().epochSeconds + configRepository.getBaseCooldown())
+
+                    //If Successful, subtract credit and change data
+                    if (response.isSuccess) {
+                        //Add Data to UiState
+                        _uiState.update { state ->
+                            val newData = state.data?.toMutableList() ?: mutableListOf()
+                            newData.add(response.getOrNull()!!)
+                            state.copy(
+                                errorCode = null,
+                                //List Re-Sorted
+                                data = if (sortByDate) newData.sortedByDescending { it.createdAt }
+                                else newData.sortedBy { it.topic },
+                            )
+                        }
+                        configRepository.handleGenerationState(gState.remaining)
+                    }
+                } else _generationState.update {
+                    it?.copy(
+                        isLoading = false,
+                        errorCode = "COOLDOWN::${gState.cooldown?.minus(Clock.System.now().epochSeconds)}",
+                        success = false
+                    )
                 }
-            } else _generationState.update {
-                it?.copy(
-                    isLoading = false,
-                    errorCode = "COOLDOWN::${
-                        configRepository.getCooldown()?.minus(Clock.System.now().epochSeconds)
-                    }",
-                    success = false
-                )
+            } catch (e: Exception) {
+                _generationState.update {
+                    it?.copy(
+                        isLoading = false,
+                        errorCode = if (e is AuthException) "AUTH::" + e.code else "DATA::" + (e as DataException).code,
+                        success = false
+                    )
+                }
             }
         }
     }

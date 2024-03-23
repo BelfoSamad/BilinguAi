@@ -1,6 +1,7 @@
 package com.samadtch.bilinguai.data.repositories.fake
 
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
+import com.samadtch.bilinguai.data.repositories.base.GenerationState
 
 class FakeConfigRepository : ConfigRepository {
 
@@ -17,13 +18,7 @@ class FakeConfigRepository : ConfigRepository {
         "developer" to "Headspace+for+Meditation,+Mindfulness+and+Sleep"
     )
 
-    override fun getBaseCooldown(): Long = 86400
+    override suspend fun getGenerationState() = Result.success(GenerationState(null, 1))
 
-    override suspend fun getCooldown() = 1710011064L
-
-    override suspend fun setCooldown(timestamp: Long) {}
-
-    override suspend fun generationsRemaining() = false
-
-    override suspend fun dropRemaining() {}
+    override suspend fun handleGenerationState(current: Int) {}
 }

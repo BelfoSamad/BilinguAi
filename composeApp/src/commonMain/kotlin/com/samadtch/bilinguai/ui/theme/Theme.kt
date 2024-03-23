@@ -1,7 +1,6 @@
 package com.samadtch.bilinguai.ui.theme
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -11,37 +10,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colors = if (darkTheme) {
-        darkColorScheme(
-            primary = Color(0xFF151515),//Black
-            secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFFFFCE00),//Bright
-            error = Color(0xFFE74C3C),
-            surfaceVariant = Color.Transparent,
-        )
-    }
-    else {
-        lightColorScheme(
-            primary = Color(0xFF151515),//Black
-            secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFFFFCE00),//Bright
-            error = Color(0xFFE74C3C),
-            surfaceVariant = Color.Transparent,
-        )
-    }
+fun AppTheme(content: @Composable () -> Unit) {
 
     MaterialTheme(
-        colorScheme = colors,
+        colorScheme = darkColorScheme(
+            primary = Color(0xFF151515),//Black
+            secondary = Color(0xFF666666),//Gray
+            tertiary = Color(0xFFFFCE00),//Bright
+            error = Color(0xFFE74C3C),
+            surfaceVariant = Color.Transparent,
+        ),
         typography = typography,
         shapes = shapes,
         content = content

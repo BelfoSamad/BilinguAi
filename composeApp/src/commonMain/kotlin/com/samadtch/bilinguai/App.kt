@@ -85,7 +85,6 @@ fun App(
         //------------------------------- Effects
         //Delete Account
         LaunchedEffect(deleteAccountState) {
-            println(deleteAccountState)
             if (deleteAccountState != null) when (deleteAccountState) {
 
                 DataException.DATA_ERROR_SERVICE -> {

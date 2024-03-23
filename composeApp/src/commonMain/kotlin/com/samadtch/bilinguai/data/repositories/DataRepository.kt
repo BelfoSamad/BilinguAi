@@ -9,6 +9,7 @@ import com.samadtch.bilinguai.di.Dispatcher
 import com.samadtch.bilinguai.models.Data
 import com.samadtch.bilinguai.utilities.exceptions.APIException
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_AUTH
+import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_GENERATION
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_OTHER
 import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ERROR_RATE_LIMIT
@@ -37,7 +38,7 @@ class DataRepository(
         withContext(dispatcher.io) {
             try {
                 val userId = authRemoteDataSource.getUserId()
-                if (userId.isFailure) Result.failure(DataException(AUTH_ERROR_USER_LOGGED_OUT))
+                if (userId.isFailure) Result.failure(AuthException(AUTH_ERROR_USER_LOGGED_OUT))
                 else {
                     var prompt = configRemoteSource.getStringConfig("LLM_PROMPT")
                     inputs.forEach {
@@ -69,7 +70,7 @@ class DataRepository(
                     //Init Data
                     val data = Data(
                         null,
-                        language = (inputs["language"] as List<*>)[0] as String,
+                        language = (inputs["foreign"] as List<*>)[0] as String,
                         topic = inputs["topic"] as String,
                         conversation = response.conversation,
                         vocabulary = response.vocabulary,
@@ -85,7 +86,7 @@ class DataRepository(
                 }
             } catch (e: APIException) {
                 when (e.code) {
-                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH -> Result.failure(e)
+                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH, API_ERROR_GENERATION -> Result.failure(e)
                     else -> Result.failure(APIException(API_ERROR_OTHER))
                 }
             } catch (e: DataException) {
@@ -101,7 +102,7 @@ class DataRepository(
 
     override suspend fun getData(): Result<List<Data>> = withContext(dispatcher.io) {
         val userId = authRemoteDataSource.getUserId()
-        if (userId.isFailure) Result.failure(DataException(AUTH_ERROR_USER_LOGGED_OUT))
+        if (userId.isFailure) Result.failure(AuthException(AUTH_ERROR_USER_LOGGED_OUT))
         else {
             try {
                 val response = dataRemoteDataSource.getData(userId.getOrNull()!!)

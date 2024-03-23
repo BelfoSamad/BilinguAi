@@ -8,7 +8,8 @@ class APIException(val code: Int, var errorMessage: String? = null): Exception()
         //Retry Later
         const val API_ERROR_SERVER_REQUEST = 12
         const val API_ERROR_SERVER_OVERLOAD = 13
+        const val API_ERROR_GENERATION = 14
 
-        const val API_ERROR_OTHER = 14
+        const val API_ERROR_OTHER = 15
     }
 }

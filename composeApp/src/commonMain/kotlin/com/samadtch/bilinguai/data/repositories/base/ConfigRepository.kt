@@ -1,5 +1,10 @@
 package com.samadtch.bilinguai.data.repositories.base
 
+data class GenerationState(
+    val cooldown: Long? = null,
+    val remaining: Int = 3
+)
+
 interface ConfigRepository {
 
     suspend fun isFirstTime(): Boolean
@@ -8,14 +13,8 @@ interface ConfigRepository {
 
     fun getAppDetails(): Map<String, String>
 
-    fun getBaseCooldown(): Long
+    suspend fun getGenerationState(): Result<GenerationState>
 
-    suspend fun getCooldown(): Long?
-
-    suspend fun setCooldown(timestamp: Long)
-
-    suspend fun generationsRemaining(): Boolean
-
-    suspend fun dropRemaining()
+    suspend fun handleGenerationState(current: Int)
 
 }
