@@ -1,5 +1,6 @@
 package com.samadtch.bilinguai
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -9,7 +10,10 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.SUCCESS
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import android.view.View
+import android.view.animation.OvershootInterpolator
 import androidx.activity.compose.setContent
+import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
@@ -89,7 +93,36 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         //Splash Screen
-        installSplashScreen().apply { this.setKeepOnScreenCondition { loaded.value } }
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { loaded.value }
+            setOnExitAnimationListener { screen ->
+                //Zoom X
+                val zoomX = ObjectAnimator.ofFloat(
+                    screen.iconView,
+                    View.SCALE_X,
+                    0.4f,
+                    0.0f
+                )
+                zoomX.interpolator = OvershootInterpolator()
+                zoomX.duration = 500
+                zoomX.doOnEnd { screen.remove() }
+
+                //Zoom Y
+                val zoomY = ObjectAnimator.ofFloat(
+                    screen.iconView,
+                    View.SCALE_Y,
+                    0.4f,
+                    0.0f
+                )
+                zoomY.interpolator = OvershootInterpolator()
+                zoomY.duration = 1000
+                zoomY.doOnEnd { screen.remove() }
+
+                //Start
+                zoomX.start()
+                zoomY.start()
+            }
+        }
 
         //Initializations
         remoteConfig.fetchAndActivate()//Remote Config

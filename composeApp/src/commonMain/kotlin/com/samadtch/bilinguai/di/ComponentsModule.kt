@@ -69,7 +69,7 @@ val dataModule = module {
 
     //------------------------------------------- Repositories
     single<ConfigRepository> {
-        ConfigRepositoryImpl(get(), get(), get(), get(), provideDispatcher())
+        ConfigRepositoryImpl(get(), get(), get(), provideDispatcher())
         //FakeConfigRepository()
     }
     single<DataRepository> {

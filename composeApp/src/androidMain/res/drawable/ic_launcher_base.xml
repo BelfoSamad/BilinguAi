@@ -5,7 +5,7 @@
     android:viewportHeight="960"
     android:tint="#151515">
     <group
-        android:name="group"
+        android:name="splashGroup"
         android:pivotX="480"
         android:pivotY="480"
         android:scaleX="0.5"
