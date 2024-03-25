@@ -33,7 +33,7 @@ class ConfigRemoteSourceAndroid(
 
     override suspend fun setGenerationState(userId: String?, cooldown: Long, remaining: Int) {
         if (userId == null) throw AuthException(AuthException.AUTH_ERROR_USER_LOGGED_OUT)
-        else db.collection("users").document(userId).set(
+        else db.collection("users").document(userId).update(
             mapOf(
                 "cooldown" to cooldown,
                 "remaining" to remaining

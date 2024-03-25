@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
-import java.util.Random
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -127,6 +126,7 @@ class MainActivity : FragmentActivity() {
         //Initializations
         remoteConfig.fetchAndActivate()//Remote Config
         handleGDPR()//GDPR
+        initReviewManager()//Review Manager
         tts = TextToSpeech(this) { _ -> }//Init TTS
 
         //Get Package Info
@@ -134,15 +134,6 @@ class MainActivity : FragmentActivity() {
             packageInfo = packageManager.getPackageInfo(packageName, 0)
         } catch (e: PackageManager.NameNotFoundException) {
             Log.d(TAG, "onCreate: " + e.message)
-        }
-
-        //Get Review Manager TODO: Put in Method
-        reviewManager = ReviewManagerFactory.create(this)
-        val request = reviewManager.requestReviewFlow()
-        request.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                reviewInfo = task.result
-            }
         }
 
         //UI
@@ -179,6 +170,16 @@ class MainActivity : FragmentActivity() {
                 },
                 ttsState = state
             )
+        }
+    }
+
+    private fun initReviewManager() {
+        reviewManager = ReviewManagerFactory.create(this)
+        val request = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                reviewInfo = task.result
+            }
         }
     }
 

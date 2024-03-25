@@ -6,6 +6,12 @@ import kotlinx.coroutines.delay
 
 class FakeDataRepository : DataRepository {
 
+    override suspend fun getDictionary(): Map<String, String> {
+        return mapOf()
+    }
+
+    override suspend fun saveDictionary(word: String, definition: String, saved: Boolean) {}
+
     //Success
     override suspend fun generateData(inputs: Map<String, Any>, temperature: Float): Result<Data> {
         delay(2000)

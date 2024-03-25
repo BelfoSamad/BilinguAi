@@ -52,9 +52,22 @@ class HomeViewModel(
                         else -> null
                     },
                     isVerified = userRepository.checkEmailVerified().getOrNull(),
+                    dictionary = dataRepository.getDictionary() ?: mapOf(),
                     //Initially sorted by date
                     data = data.getOrNull()?.sortedByDescending { data -> data.createdAt }
                 )
+            }
+        }
+    }
+
+    fun saveWord(word: String, definition: String, saved: Boolean) {
+        viewModelScope.launch {
+            dataRepository.saveDictionary(word, definition, saved)
+            val dict =  _uiState.value.dictionary.toMutableMap()
+            if (saved) dict[word] = definition
+            else dict.remove(word)
+            _uiState.update {
+                it.copy(dictionary = dict)
             }
         }
     }

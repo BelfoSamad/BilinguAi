@@ -1,6 +1,7 @@
 package com.samadtch.bilinguai.data.datasources.remote.base
 
 import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
@@ -10,6 +11,32 @@ import org.koin.dsl.module
 import com.samadtch.bilinguai.utilities.exceptions.DataException
 
 class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSource {
+
+    override suspend fun saveDictionary(userId: String?, word: String, definition: String, saved: Boolean) {
+        try {
+            if (userId != null) {
+                if (saved) db.collection("users").document(userId).update(mapOf(word to definition))
+                else db.collection("users").document(userId).update(mapOf(word to FieldValue.delete()))
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun getDictionary(userId: String?): Map<String, String>? {
+        return try {
+            if (userId == null) null
+            else (db.collection("users")
+                .document(userId)
+                .get()
+                .await().data as Map<String, String>)
+                .filter {
+                    it.key !in listOf("cooldown", "remaining")
+                }
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     override suspend fun insertData(userId: String, data: Data) = try {
         db.collection("users").document(userId).collection("data")

@@ -3,19 +3,30 @@ package com.samadtch.bilinguai.ui.common
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samadtch.bilinguai.Resources.strings
 import com.samadtch.bilinguai.ui.theme.ErrorFilledButtonColors
+import com.samadtch.bilinguai.ui.theme.PrimaryIconButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryTextFieldColors
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_WRONG_CREDENTIALS
@@ -54,9 +66,77 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
+fun DictionaryDialog(
+    dictionary: Map<String, String>,
+    unsaveWord: (String, String) -> Unit,
+    onDismiss: () -> Unit = {},
+) {
+    AlertDialog(
+        containerColor = MaterialTheme.colorScheme.primary,
+        onDismissRequest = { onDismiss() },
+        confirmButton = { /*Do Nothing*/ },
+        title = {},
+        text = {
+            if (dictionary.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        imageVector = Icons.Default.ErrorOutline,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        contentDescription = null
+                    )
+                    Spacer(Modifier.padding(4.dp))
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        text = stringResource(strings.dictionary_error_empty),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+            } else LazyColumn {
+                items(items = dictionary.keys.toList()) {
+                    Row {
+                        FilledTonalIconButton(
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                            colors = PrimaryIconButtonColors(),
+                            onClick = { unsaveWord(it, dictionary[it]!!) }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Remove,
+                                tint = MaterialTheme.colorScheme.error,
+                                contentDescription = null
+                            )
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Spacer(Modifier.padding(8.dp))
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
+                            )
+                            Text(
+                                text = dictionary[it]!!,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontSize = 14.sp
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
 fun DefinitionDialog(
     word: String,
     definition: String,
+    saved: Boolean = false,
+    saveWord: (String, String) -> Unit,
     onDismiss: () -> Unit = {},
 ) {
     AlertDialog(
@@ -64,12 +144,18 @@ fun DefinitionDialog(
         onDismissRequest = { onDismiss() },
         confirmButton = { /*Do Nothing*/ },
         title = {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                text = word,
-                style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
-            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    text = word,
+                    style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
+                )
+                FilledTonalIconButton(
+                    colors = PrimaryIconButtonColors(),
+                    onClick = { saveWord(word, definition) }) {
+                    Icon(if (saved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkAdd, null)
+                }
+            }
         },
         text = {
             Text(

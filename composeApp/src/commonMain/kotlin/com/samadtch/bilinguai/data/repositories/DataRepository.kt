@@ -34,6 +34,19 @@ class DataRepository(
     private val dispatcher: Dispatcher
 ) : DataRepository {
 
+    override suspend fun getDictionary() = withContext(dispatcher.io) {
+        dataRemoteDataSource.getDictionary(authRemoteDataSource.getUserId().getOrNull())
+    }
+
+    override suspend fun saveDictionary(word: String, definition: String, saved: Boolean) {
+        dataRemoteDataSource.saveDictionary(
+            authRemoteDataSource.getUserId().getOrNull(),
+            word,
+            definition,
+            saved
+        )
+    }
+
     override suspend fun generateData(inputs: Map<String, Any>, temperature: Float): Result<Data> =
         withContext(dispatcher.io) {
             try {
@@ -86,7 +99,10 @@ class DataRepository(
                 }
             } catch (e: APIException) {
                 when (e.code) {
-                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH, API_ERROR_GENERATION -> Result.failure(e)
+                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH, API_ERROR_GENERATION -> Result.failure(
+                        e
+                    )
+
                     else -> Result.failure(APIException(API_ERROR_OTHER))
                 }
             } catch (e: DataException) {

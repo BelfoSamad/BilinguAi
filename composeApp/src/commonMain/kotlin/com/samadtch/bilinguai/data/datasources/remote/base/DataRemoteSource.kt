@@ -5,6 +5,10 @@ import org.koin.core.module.Module
 
 interface DataRemoteSource {
 
+    suspend fun saveDictionary(userId: String?, word: String, definition: String, saved: Boolean)
+
+    suspend fun getDictionary(userId: String?): Map<String, String>?
+
     suspend fun insertData(userId: String, data: Data): String?
 
     suspend fun getData(userId: String): List<Data>

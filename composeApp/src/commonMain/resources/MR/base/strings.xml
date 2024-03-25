@@ -84,6 +84,7 @@
     <string name="error_account_no_exists">It appears that your account has already been deleted or disabled.</string>
     <string name="error_account_exists">An account is already registered with the email you provided.</string>
     <string name="error_empty">No data has been generated.</string>
+    <string name="dictionary_error_empty">No word saved.</string>
     <string name="error_network">Unable to establish a connection. Please verify your network connection and attempt again.</string>
     <string name="error_rate_limit">Currently experiencing high request volume. Please try again in a few minutes.</string>
     <string name="error_api">An error occurred with the API. Please attempt again later.</string>

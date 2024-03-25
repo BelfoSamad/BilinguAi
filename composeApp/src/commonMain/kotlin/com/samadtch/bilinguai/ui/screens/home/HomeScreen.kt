@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Delete
@@ -70,6 +71,7 @@ import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.common.CheckboxInputView
 import com.samadtch.bilinguai.ui.common.DefinitionDialog
 import com.samadtch.bilinguai.ui.common.DeleteDataDialog
+import com.samadtch.bilinguai.ui.common.DictionaryDialog
 import com.samadtch.bilinguai.ui.common.NumberInputView
 import com.samadtch.bilinguai.ui.common.SelectionInputView
 import com.samadtch.bilinguai.ui.common.TextInputView
@@ -106,6 +108,7 @@ data class DataUiState(
     val isLoading: Boolean = true,
     val errorCode: String? = null,
     val isVerified: Boolean? = null,
+    val dictionary: Map<String, String> = mapOf(),
     val data: List<Data>? = null,
     val email: String? = null
 )
@@ -139,6 +142,7 @@ fun HomeScreen(
     val deletedState by viewModel.deletedState.collectAsStateWithLifecycle()
 
     //Dialogs
+    var showDictionaryDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDataDialog by rememberSaveable { mutableStateOf<String?>(null) }
     var topicToDelete by rememberSaveable { mutableStateOf<String?>(null) }
     var sortByDate by rememberSaveable { mutableStateOf(true) }
@@ -276,17 +280,29 @@ fun HomeScreen(
 
     //------------------------------- Dialogs
     if (word != null) {
-        DefinitionDialog(word = word!!, definition = definition!!, onDismiss = {
-            word = null
-            definition = null
-        })
-    }
+        DefinitionDialog(
+            word = word!!,
+            definition = definition!!,
+            saved = uiState.dictionary.containsKey(word!!),
+            saveWord = { w, d -> viewModel.saveWord(w, d, true)},
+            onDismiss = {
+                word = null
+                definition = null
+            })
+    }//Definition Dialog
     if (message != null) {
         TranslationDialog(message = message!!, translation = translation!!, onDismiss = {
             message = null
             translation = null
         })
-    }
+    }//Translation Dialog
+    if (showDictionaryDialog) {
+        DictionaryDialog(
+            uiState.dictionary,
+            unsaveWord = { w, d -> viewModel.saveWord(w, d, false) },
+            onDismiss = { showDictionaryDialog = false }
+        )
+    }//Dictionary Dialog
     if (showDeleteDataDialog != null) {
         DeleteDataDialog(
             id = showDeleteDataDialog!!,
@@ -295,7 +311,7 @@ fun HomeScreen(
             deleteDataState = deletedState,
             onDismiss = { if (deletedState != -99) showDeleteDataDialog = null }
         )
-    }
+    }//Delete Account Dialog
 
     //------------------------------- UI
     Surface(
@@ -318,15 +334,25 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             )
-                            FilledTonalIconButton(
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                                onClick = { openDrawer() },
-                                colors = PrimaryIconButtonColors()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = null
-                                )
+                            Row(modifier = Modifier.align(Alignment.CenterVertically)) {
+                                FilledTonalIconButton(
+                                    onClick = { openDrawer() },
+                                    colors = PrimaryIconButtonColors()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = null
+                                    )
+                                }
+                                FilledTonalIconButton(
+                                    onClick = { showDictionaryDialog = true },
+                                    colors = PrimaryIconButtonColors()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.ReceiptLong,
+                                        contentDescription = null
+                                    )
+                                }
                             }
                         }
 

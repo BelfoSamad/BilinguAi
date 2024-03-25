@@ -174,6 +174,8 @@ android {
     }
     viewBinding { enable = true }
     dependencies {
+        implementation(libs.androidx.material)
+
         //Compose
         implementation(libs.compose.lifecycle)
         debugImplementation(libs.compose.ui.tooling)
