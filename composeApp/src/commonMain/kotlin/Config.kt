@@ -1,4 +1,5 @@
 import com.samadtch.bilinguai.models.pojo.inputs.BaseInput
+import com.samadtch.bilinguai.models.pojo.inputs.NumberInput
 import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.screens.boarding.HypeMessage
