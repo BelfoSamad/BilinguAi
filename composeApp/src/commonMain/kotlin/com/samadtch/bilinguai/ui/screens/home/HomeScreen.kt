@@ -284,7 +284,7 @@ fun HomeScreen(
             word = word!!,
             definition = definition!!,
             saved = uiState.dictionary.containsKey(word!!),
-            saveWord = { w, d -> viewModel.saveWord(w, d, true)},
+            saveWord = { w, d -> viewModel.saveWord(w, d, true) },
             onDismiss = {
                 word = null
                 definition = null
@@ -510,6 +510,7 @@ fun DynamicForm(
     val dataFlow = remember { inputs.flatten().map { MutableSharedFlow<Pair<String, Any>?>() } }
     var generateClicked by remember { mutableStateOf(false) }
     var disableInputs by remember { mutableStateOf(false) }
+    var resetInput by remember { mutableStateOf(false) }
 
     //------------------------------- Effects
     LaunchedEffect(true) {
@@ -530,6 +531,7 @@ fun DynamicForm(
 
     LaunchedEffect(generationState) {
         disableInputs = generationState?.isLoading == true
+        resetInput = generationState?.isLoading == false
     }
 
     //------------------------------- UI
@@ -542,6 +544,7 @@ fun DynamicForm(
                     !disableInputs,
                     input,
                     generateClicked,
+                    resetInput,
                     dataFlow[flattenedIndex]
                 )
 
@@ -549,6 +552,7 @@ fun DynamicForm(
                     !disableInputs,
                     input,
                     generateClicked,
+                    resetInput,
                     dataFlow[flattenedIndex]
                 )
 
@@ -556,6 +560,7 @@ fun DynamicForm(
                     !disableInputs,
                     input,
                     generateClicked,
+                    resetInput,
                     dataFlow[flattenedIndex]
                 )
 
@@ -563,6 +568,7 @@ fun DynamicForm(
                     !disableInputs,
                     input,
                     generateClicked,
+                    resetInput,
                     dataFlow[flattenedIndex]
                 )
             }
@@ -574,6 +580,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -582,6 +589,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -590,6 +598,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -598,6 +607,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -609,6 +619,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -617,6 +628,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -625,6 +637,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )
@@ -633,6 +646,7 @@ fun DynamicForm(
                         !disableInputs,
                         input,
                         generateClicked,
+                        resetInput,
                         dataFlow[flattenedIndex],
                         Modifier.weight(1f).align(Alignment.CenterVertically)
                     )

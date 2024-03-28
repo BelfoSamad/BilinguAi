@@ -50,6 +50,7 @@ fun TextInputView(
     enable: Boolean,
     input: TextInput,
     onDataRequested: Boolean,
+    onDataReset: Boolean,
     valueFlow: MutableSharedFlow<Pair<String, Any>?>,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
@@ -66,9 +67,11 @@ fun TextInputView(
             } else {
                 error = null
                 valueFlow.emit(Pair(input.key, value))
-                value = ""
             }
         }
+    }
+    LaunchedEffect(onDataReset) {
+        if (onDataReset) value = ""
     }
 
     //------------------------------- UI
@@ -109,6 +112,7 @@ fun NumberInputView(
     enable: Boolean,
     input: NumberInput,
     onDataRequested: Boolean,
+    onDataReset: Boolean,
     valueFlow: MutableSharedFlow<Pair<String, Any>?>,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
@@ -136,9 +140,11 @@ fun NumberInputView(
             } else {
                 error = null
                 valueFlow.emit(Pair(input.key, value))
-                value = ""
             }
         }
+    }
+    LaunchedEffect(onDataReset) {
+        if (onDataReset) value = ""
     }
 
     //------------------------------- UI
@@ -204,6 +210,7 @@ fun CheckboxInputView(
     enable: Boolean,
     input: BooleanInput,
     onDataRequested: Boolean,
+    onDataReset: Boolean,
     valueFlow: MutableSharedFlow<Pair<String, Any>?>,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
@@ -214,9 +221,12 @@ fun CheckboxInputView(
     LaunchedEffect(onDataRequested) {
         if (onDataRequested) {
             valueFlow.emit(Pair(input.key, value))
-            value = input.defaultValue
         }
     }
+    LaunchedEffect(onDataReset) {
+        if (onDataReset) value = input.defaultValue
+    }
+
 
     //------------------------------- UI
     Row(modifier.padding(16.dp, 0.dp)) {
@@ -243,6 +253,7 @@ fun SelectionInputView(
     enable: Boolean,
     input: OptionsInput,
     onDataRequested: Boolean,
+    onDataReset: Boolean,
     valueFlow: MutableSharedFlow<Pair<String, Any>?>,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
@@ -266,9 +277,11 @@ fun SelectionInputView(
             } else {
                 error = null
                 valueFlow.emit(Pair(input.key, value.toList()))
-                value.clear()
             }
         }
+    }
+    LaunchedEffect(onDataReset) {
+        if (onDataReset) value.clear()
     }
 
     //------------------------------- UI

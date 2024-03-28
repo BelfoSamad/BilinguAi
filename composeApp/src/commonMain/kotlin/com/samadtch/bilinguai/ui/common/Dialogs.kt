@@ -92,7 +92,7 @@ fun DictionaryDialog(
                     Spacer(Modifier.padding(8.dp))
                     Row {
                         OutlinedIconButton(
-                            modifier = Modifier.padding(end = 8.dp).align(Alignment.CenterVertically),
+                            modifier = Modifier.padding(end = 16.dp).align(Alignment.CenterVertically),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
                             onClick = { unsaveWord(it, dictionary[it]!!) }) {
                             Icon(

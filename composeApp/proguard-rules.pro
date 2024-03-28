@@ -24,6 +24,12 @@
 -keepclassmembers class com.samadtch.bilinguai.models.** {
   *;
 }
+-keepclassmembers class kotlinx.** {
+    volatile <fields>;
+}
+-keepclassmembers class io.ktor.** {
+    volatile <fields>;
+}
 
 -dontwarn java.beans.ConstructorProperties
 -dontwarn java.beans.Transient
@@ -32,5 +38,4 @@
 -dontwarn org.slf4j.impl.StaticMDCBinder
 -dontwarn org.slf4j.impl.StaticMarkerBinder
 -dontwarn org.slf4j.impl.StaticLoggerBinder
--dontwarn io.ktor.**
 -dontwarn com.typesafe.**
