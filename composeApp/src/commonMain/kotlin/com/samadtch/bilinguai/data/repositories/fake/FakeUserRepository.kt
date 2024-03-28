@@ -1,20 +1,18 @@
 package com.samadtch.bilinguai.data.repositories.fake
 
-import com.samadtch.bilinguai.data.repositories.base.UserRepository
-import kotlinx.coroutines.delay
-
+/*
 class FakeUserRepository : UserRepository {
 
     //Success
     override suspend fun register(email: String, password: String): Result<String> {
         delay(3000)
-        return Result.success("abcd")
+        return Result.success("a")
     }
 
     //Success
     override suspend fun login(email: String, password: String): Result<String> {
         delay(3000)
-        return Result.success("abcd")
+        return Result.success("a")
     }
 
     //For Later
@@ -57,3 +55,4 @@ class FakeUserRepository : UserRepository {
     //Success
     override suspend fun logout() {}
 }
+ */

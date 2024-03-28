@@ -1,10 +1,8 @@
 import com.samadtch.bilinguai.models.pojo.inputs.BaseInput
-import com.samadtch.bilinguai.models.pojo.inputs.NumberInput
 import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.screens.boarding.HypeMessage
 
-//TODO: Update Architecture
 fun getInputs(): List<List<BaseInput>> {
     return listOf(
         listOf(

@@ -4,11 +4,11 @@ class DataException(val code: Int) : Exception() {
     companion object {
         const val DATA_ERROR_NETWORK = -30 //Either concurrency problem or network interruptions
         const val DATA_ERROR_SERVICE = 30 //An error most likely related to server
-        const val DATA_ERROR_DEADLINE_EXCEEDED = 31 //Either slow internet connection or big query
+        private const val DATA_ERROR_DEADLINE_EXCEEDED = 31 //Either slow internet connection or big query
         const val DATA_ERROR_NOT_FOUND = 32 //Query not founded or empty list
-        const val DATA_ERROR_ALREADY_EXISTS = 33
-        const val DATA_ERROR_CONCURRENCY = 34
-        const val DATA_ERROR_UNAUTHENTICATED = 35
+        private const val DATA_ERROR_ALREADY_EXISTS = 33
+        private const val DATA_ERROR_CONCURRENCY = 34
+        private const val DATA_ERROR_UNAUTHENTICATED = 35
 
         //Firebase - Errors
         val FIRESTORE_SERVICE_ERRORS = listOf(2, 3, 7, 8, 9, 11, 12, 13, 14, 15)
@@ -17,8 +17,8 @@ class DataException(val code: Int) : Exception() {
 
         const val FIRESTORE_ERROR_DEADLINE = 4
         const val FIRESTORE_ERROR_NOT_FOUND = 5
-        const val FIRESTORE_ERROR_ALREADY_EXISTS = 6
-        const val FIRESTORE_ERROR_UNAUTHENTICATED = 16
+        private const val FIRESTORE_ERROR_ALREADY_EXISTS = 6
+        private const val FIRESTORE_ERROR_UNAUTHENTICATED = 16
 
 
         //Handle Error
@@ -35,6 +35,7 @@ class DataException(val code: Int) : Exception() {
         }
 
         //Handle Error
+        /*
         fun getError(errorCode: Int): DataException {
             return when (errorCode) {
                 in FIRESTORE_NETWORK_ERRORS -> DataException(DATA_ERROR_NETWORK)
@@ -45,6 +46,6 @@ class DataException(val code: Int) : Exception() {
                 FIRESTORE_ERROR_UNAUTHENTICATED -> DataException(DATA_ERROR_UNAUTHENTICATED)
                 else -> DataException(DATA_ERROR_SERVICE)
             }
-        }
+        }*/
     }
 }

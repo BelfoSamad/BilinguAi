@@ -1,8 +1,6 @@
 package com.samadtch.bilinguai.data.repositories.fake
 
-import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
-import com.samadtch.bilinguai.data.repositories.base.GenerationState
-
+/*
 class FakeConfigRepository : ConfigRepository {
 
     //Success
@@ -21,4 +19,4 @@ class FakeConfigRepository : ConfigRepository {
     override suspend fun getGenerationState() = Result.success(GenerationState(null, 1))
 
     override suspend fun handleGenerationState(current: Int) {}
-}
+}*/

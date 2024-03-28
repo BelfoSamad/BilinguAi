@@ -5,9 +5,9 @@ import com.samadtch.bilinguai.data.datasources.local.appDSFileName
 import com.samadtch.bilinguai.data.datasources.local.getDataStore
 import com.samadtch.bilinguai.data.datasources.local.userDSFileName
 import com.samadtch.bilinguai.data.datasources.remote.base.ModelRemoteSource
-import com.samadtch.bilinguai.data.datasources.remote.base.getAuthRemoteSource
-import com.samadtch.bilinguai.data.datasources.remote.base.getConfigRemoteSource
-import com.samadtch.bilinguai.data.datasources.remote.base.getDataRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.getAuthRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.getConfigRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.getDataRemoteSource
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
 import com.samadtch.bilinguai.data.repositories.base.DataRepository
 import com.samadtch.bilinguai.data.repositories.base.UserRepository

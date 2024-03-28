@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.data.datasources.remote.base
+package com.samadtch.bilinguai.data.datasources.remote
 
 import com.samadtch.bilinguai.data.repositories.base.GenerationState
 import org.koin.core.module.Module

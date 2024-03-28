@@ -1,8 +1,8 @@
 package com.samadtch.bilinguai.data.repositories
 
 import com.samadtch.bilinguai.data.datasources.local.AppPrefDataSource
-import com.samadtch.bilinguai.data.datasources.remote.base.AuthRemoteSource
-import com.samadtch.bilinguai.data.datasources.remote.base.ConfigRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.AuthRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.ConfigRemoteSource
 import com.samadtch.bilinguai.data.repositories.base.ConfigRepository
 import com.samadtch.bilinguai.data.repositories.base.GenerationState
 import com.samadtch.bilinguai.di.Dispatcher

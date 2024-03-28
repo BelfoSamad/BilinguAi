@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.data.datasources.remote.base
+package com.samadtch.bilinguai.data.datasources.remote
 
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.EmailAuthProvider

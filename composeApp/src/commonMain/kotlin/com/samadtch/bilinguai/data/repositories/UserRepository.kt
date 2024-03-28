@@ -1,6 +1,6 @@
 package com.samadtch.bilinguai.data.repositories
 
-import com.samadtch.bilinguai.data.datasources.remote.base.AuthRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.AuthRemoteSource
 import com.samadtch.bilinguai.data.repositories.base.UserRepository
 import com.samadtch.bilinguai.di.Dispatcher
 import com.samadtch.bilinguai.utilities.exceptions.AuthException

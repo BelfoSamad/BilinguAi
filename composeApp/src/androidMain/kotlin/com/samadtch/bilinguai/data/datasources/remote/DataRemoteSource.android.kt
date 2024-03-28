@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.data.datasources.remote.base
+package com.samadtch.bilinguai.data.datasources.remote
 
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FieldValue

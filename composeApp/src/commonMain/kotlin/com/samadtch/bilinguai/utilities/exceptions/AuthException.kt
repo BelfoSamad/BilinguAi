@@ -4,7 +4,7 @@ class AuthException(val code: Int) : Exception() {
     companion object {
         //Errors
         const val AUTH_ERROR_NETWORK = -20
-        const val AUTH_ERROR_WRONG_CREDENTIALS = 20
+        //const val AUTH_ERROR_WRONG_CREDENTIALS = 20
         const val AUTH_ERROR_INVALID_EMAIL = 21
         const val AUTH_ERROR_WRONG_PASSWORD = 22
         const val AUTH_ERROR_WRONG_EMAIL = 23//Email doesn't exist or account disabled

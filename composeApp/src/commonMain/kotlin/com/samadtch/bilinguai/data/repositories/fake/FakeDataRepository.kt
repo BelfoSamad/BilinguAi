@@ -1,9 +1,7 @@
 package com.samadtch.bilinguai.data.repositories.fake
 
-import com.samadtch.bilinguai.data.repositories.base.DataRepository
-import com.samadtch.bilinguai.models.Data
-import kotlinx.coroutines.delay
 
+/*
 class FakeDataRepository : DataRepository {
 
     override suspend fun getDictionary(): Map<String, String> {
@@ -491,4 +489,4 @@ class FakeDataRepository : DataRepository {
         delay(5000)
     }
 
-}
+}*/

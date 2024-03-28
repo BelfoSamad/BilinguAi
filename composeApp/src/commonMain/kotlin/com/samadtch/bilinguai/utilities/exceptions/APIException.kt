@@ -1,6 +1,6 @@
 package com.samadtch.bilinguai.utilities.exceptions
 
-class APIException(val code: Int, var errorMessage: String? = null): Exception() {
+class APIException(val code: Int): Exception() {
     companion object {
         const val API_ERROR_NETWORK = -10
         const val API_ERROR_AUTH = 10

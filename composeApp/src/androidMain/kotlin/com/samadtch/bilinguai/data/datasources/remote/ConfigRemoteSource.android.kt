@@ -1,4 +1,4 @@
-package com.samadtch.bilinguai.data.datasources.remote.base
+package com.samadtch.bilinguai.data.datasources.remote
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
