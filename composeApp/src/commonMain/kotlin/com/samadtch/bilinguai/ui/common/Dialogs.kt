@@ -1,5 +1,6 @@
 package com.samadtch.bilinguai.ui.common
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +30,9 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -99,19 +102,19 @@ fun DictionaryDialog(
                 }
             } else LazyColumn {
                 items(items = dictionary.keys.toList()) {
+                    Spacer(Modifier.padding(8.dp))
                     Row {
-                        FilledTonalIconButton(
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            colors = PrimaryIconButtonColors(),
+                        OutlinedIconButton(
+                            modifier = Modifier.padding(end = 8.dp).align(Alignment.CenterVertically),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
                             onClick = { unsaveWord(it, dictionary[it]!!) }) {
                             Icon(
                                 imageVector = Icons.Outlined.Remove,
-                                tint = MaterialTheme.colorScheme.error,
+                                tint = MaterialTheme.colorScheme.secondary,
                                 contentDescription = null
                             )
                         }
                         Column(Modifier.weight(1f)) {
-                            Spacer(Modifier.padding(8.dp))
                             Text(
                                 text = it,
                                 style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)

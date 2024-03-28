@@ -37,10 +37,12 @@ class AuthRemoteSourceAndroid(
         val user = auth.createUserWithEmailAndPassword(email, password)
             .await().user!!
         user.sendEmailVerification().await()
-        db.collection("users").document(user.uid).set(mapOf<String, Any?>(
-            "cooldown" to null,
-            "remaining" to config.getLong("GENERATIONS_COUNT").toInt()
-        )).await()
+        db.collection("users").document(user.uid).set(
+            mapOf<String, Any?>(
+                "cooldown" to null,
+                "remaining" to config.getLong("GENERATIONS_COUNT").toInt()
+            )
+        ).await()
         //Return Id
         Result.success(user.uid)
     } catch (e: FirebaseNetworkException) {
@@ -132,8 +134,8 @@ class AuthRemoteSourceAndroid(
     override suspend fun deleteAccount() {
         val user = auth.currentUser ?: throw AuthException(AUTH_ERROR_USER_LOGGED_OUT)
         try {
-            user.delete().await()
             db.collection("users").document(user.uid).delete().await()
+            user.delete().await()
         } catch (e: FirebaseNetworkException) {
             throw AuthException(AUTH_ERROR_NETWORK)
         } catch (e: FirebaseAuthInvalidUserException) {

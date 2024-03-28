@@ -128,6 +128,7 @@ class MainActivity : FragmentActivity() {
         handleGDPR()//GDPR
         initReviewManager()//Review Manager
         tts = TextToSpeech(this) { _ -> }//Init TTS
+        loadInterstitialAd()//Initial InterstitialAd Loading
 
         //Get Package Info
         try {
