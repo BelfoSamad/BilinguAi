@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DefaultMap>
-    <!-- TODO: Update Links -->
     <!-- Base Links -->
     <entry>
         <key>PRIVACY_POLICY_LINK</key>
-        <value>https://www.google.com/</value>
+        <value>https://bilinguai.samadtch.com/privacy_policy</value>
     </entry>
     <entry>
         <key>TOS_LINK</key>
-        <value>https://www.google.com/</value>
+        <value>https://bilinguai.samadtch.com/tos</value>
     </entry>
     <entry>
         <key>DEVELOPER_ID</key>

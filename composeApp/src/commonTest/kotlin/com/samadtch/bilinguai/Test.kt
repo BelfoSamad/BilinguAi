@@ -1,6 +1,6 @@
 package com.samadtch.bilinguai
 
-import data.datasources.remote.ModelRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.ModelRemoteSource
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
