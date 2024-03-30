@@ -1,6 +1,6 @@
 package com.samadtch.bilinguai
 
-import com.samadtch.bilinguai.data.datasources.remote.ModelRemoteSource
+import com.samadtch.bilinguai.data.datasources.remote.ChatGptRemoteSource
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -14,11 +14,11 @@ import kotlin.test.assertTrue
 
 class ModelTest {
 
-    private lateinit var model: ModelRemoteSource
+    private lateinit var model: ChatGptRemoteSource
 
     @BeforeTest
     fun setupHttpClient() {
-        model = ModelRemoteSource(
+        model = ChatGptRemoteSource(
             HttpClient(CIO) {
                 expectSuccess = true//Throw error if failed
 

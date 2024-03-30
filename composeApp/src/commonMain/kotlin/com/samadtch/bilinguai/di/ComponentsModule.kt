@@ -23,7 +23,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import com.samadtch.bilinguai.data.datasources.remote.ModelRemoteSource as ModelRemoteSourceImpl
+import com.samadtch.bilinguai.data.datasources.remote.GeminiRemoteSource
 import com.samadtch.bilinguai.data.repositories.ConfigRepository as ConfigRepositoryImpl
 import com.samadtch.bilinguai.data.repositories.DataRepository as DataRepositoryImpl
 import com.samadtch.bilinguai.data.repositories.UserRepository as UserRepositoryImpl
@@ -57,7 +57,7 @@ val dataModule = module {
         getConfigRemoteSource(),
         getDataRemoteSource(),
     )
-    single<ModelRemoteSource> { ModelRemoteSourceImpl(get()) }
+    single<ModelRemoteSource> { GeminiRemoteSource(get()) }
 
     // Preferences
     single<com.samadtch.bilinguai.data.datasources.local.AppPrefDataSource> {

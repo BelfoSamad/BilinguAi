@@ -1,5 +1,6 @@
 package com.samadtch.bilinguai.data.repositories
 
+import com.samadtch.bilinguai.BuildKonfig
 import com.samadtch.bilinguai.data.datasources.remote.AuthRemoteSource
 import com.samadtch.bilinguai.data.datasources.remote.ConfigRemoteSource
 import com.samadtch.bilinguai.data.datasources.remote.DataRemoteSource
@@ -71,10 +72,18 @@ class DataRepository(
                     }
 
                     //Generate Data
+                    println(configRemoteSource.getStringConfig("LLM_URL").plus(
+                        configRemoteSource.getStringConfig("LLM_MODEL")
+                    ).plus(
+                        "?key=${BuildKonfig.APIKey}"
+                    ))
                     val response = modelRemoteDataSource.generateData(
                         settings = mapOf(
-                            "URL" to configRemoteSource.getStringConfig("LLM_URL"),
-                            "model" to configRemoteSource.getStringConfig("LLM_MODEL"),
+                            "URL" to configRemoteSource.getStringConfig("LLM_URL").plus(
+                                configRemoteSource.getStringConfig("LLM_MODEL")
+                            ).plus(
+                                "?key=${BuildKonfig.APIKey}"
+                            ),
                             "temperature" to temperature
                         ),
                         prompt = prompt

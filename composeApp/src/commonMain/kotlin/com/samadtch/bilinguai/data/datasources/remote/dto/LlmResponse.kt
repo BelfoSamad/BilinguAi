@@ -3,8 +3,11 @@ package com.samadtch.bilinguai.data.datasources.remote.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * ********************************** ChatGpt
+ */
 @Serializable
-data class LlmResponse(
+data class ChatGptResponse(
     val choices: List<Choice>,
     val created: Int,
     val id: String,
@@ -30,4 +33,18 @@ data class Choice(
     val index: Int,
     val logprobs: Boolean?,
     val message: Message
+)
+
+/**
+ * ********************************** Gemini Pro
+ */
+@Serializable
+data class GeminiResponse(
+    val candidates: List<Candidate>
+)
+
+@Serializable
+data class Candidate(
+    val index: Int,
+    val content: Content
 )

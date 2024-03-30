@@ -36,10 +36,10 @@
     </entry>
     <entry>
         <key>LLM_URL</key>
-        <value>https://api.openai.com/v1/chat/completions</value>
+        <value>https://generativelanguage.googleapis.com/v1beta/models</value>
     </entry>
     <entry>
         <key>LLM_MODEL</key>
-        <value>gpt-3.5-turbo</value>
+        <value>/gemini-pro:generateContent</value>
     </entry>
 </DefaultMap>
