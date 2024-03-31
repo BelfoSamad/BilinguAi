@@ -26,7 +26,7 @@
     <entry>
         <key>LLM_PROMPT</key>
         <value>Generate a conversation between 2 people in {{foreign}} about {{topic}} of 8
-            messages, return the data as json that contains a list of all the messages as a strings
+            messages, return the data as a json string that contains a list of all the messages as a strings
             list (named conversation and contains only the messages without the names of the
             senders) and a map of vocabulary from that conversation (only hard interesting words)
             which contains the word as key and the definition (in {{native}}) as value. If the

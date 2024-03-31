@@ -72,11 +72,6 @@ class DataRepository(
                     }
 
                     //Generate Data
-                    println(configRemoteSource.getStringConfig("LLM_URL").plus(
-                        configRemoteSource.getStringConfig("LLM_MODEL")
-                    ).plus(
-                        "?key=${BuildKonfig.APIKey}"
-                    ))
                     val response = modelRemoteDataSource.generateData(
                         settings = mapOf(
                             "URL" to configRemoteSource.getStringConfig("LLM_URL").plus(
