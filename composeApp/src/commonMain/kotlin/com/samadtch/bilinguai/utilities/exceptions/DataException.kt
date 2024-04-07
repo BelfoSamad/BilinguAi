@@ -12,7 +12,7 @@ class DataException(val code: Int) : Exception() {
 
         //Firebase - Errors
         val FIRESTORE_SERVICE_ERRORS = listOf(2, 3, 7, 8, 9, 11, 12, 13, 14, 15)
-        val FIRESTORE_NETWORK_ERRORS = listOf(1, 2, 14)
+        val FIRESTORE_NETWORK_ERRORS = listOf(1, 14)
         val FIRESTORE_CONCURRENCY_ERRORS = listOf(1, 10)
 
         const val FIRESTORE_ERROR_DEADLINE = 4
