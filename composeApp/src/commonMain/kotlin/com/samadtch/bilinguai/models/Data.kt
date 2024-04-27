@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class Data(
     val dataId: String? = null,
+    val reported: Boolean = false,
     val language: String = "",
     val topic: String = "",
     val conversation: List<String> = listOf(),

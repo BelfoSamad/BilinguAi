@@ -16,13 +16,11 @@ import com.samadtch.bilinguai.utilities.exceptions.APIException.Companion.API_ER
 import com.samadtch.bilinguai.utilities.exceptions.AuthException
 import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_ERROR_USER_LOGGED_OUT
 import com.samadtch.bilinguai.utilities.exceptions.DataException
+import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_CONCURRENCY
+import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_DEADLINE_EXCEEDED
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NETWORK
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_NOT_FOUND
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_SERVICE
-import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.FIRESTORE_CONCURRENCY_ERRORS
-import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.FIRESTORE_ERROR_DEADLINE
-import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.FIRESTORE_ERROR_NOT_FOUND
-import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.FIRESTORE_NETWORK_ERRORS
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
@@ -99,18 +97,16 @@ class DataRepository(
                 }
             } catch (e: APIException) {
                 when (e.code) {
-                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH, API_ERROR_GENERATION -> Result.failure(
-                        e
-                    )
+                    API_ERROR_NETWORK, API_ERROR_RATE_LIMIT, API_ERROR_AUTH, API_ERROR_GENERATION ->
+                        Result.failure(e)
 
                     else -> Result.failure(APIException(API_ERROR_OTHER))
                 }
             } catch (e: DataException) {
                 when (e.code) {
-                    in FIRESTORE_NETWORK_ERRORS, in FIRESTORE_CONCURRENCY_ERRORS, FIRESTORE_ERROR_DEADLINE ->
+                    DATA_ERROR_NETWORK, DATA_ERROR_CONCURRENCY, DATA_ERROR_DEADLINE_EXCEEDED ->
                         Result.failure(DataException(DATA_ERROR_NETWORK))
 
-                    FIRESTORE_ERROR_NOT_FOUND -> Result.failure(DataException(DATA_ERROR_NOT_FOUND))
                     else -> Result.failure(DataException(DATA_ERROR_SERVICE))
                 }
             }
@@ -126,15 +122,10 @@ class DataRepository(
                 else Result.success(response)
             } catch (e: DataException) {
                 when (e.code) {
-                    in FIRESTORE_NETWORK_ERRORS,
-                    in FIRESTORE_CONCURRENCY_ERRORS,
-                    FIRESTORE_ERROR_DEADLINE -> Result.failure(DataException(DATA_ERROR_NETWORK))
+                    DATA_ERROR_NETWORK, DATA_ERROR_CONCURRENCY, DATA_ERROR_DEADLINE_EXCEEDED ->
+                        Result.failure(DataException(DATA_ERROR_NETWORK))
 
-                    FIRESTORE_ERROR_NOT_FOUND, DATA_ERROR_NOT_FOUND -> Result.failure(
-                        DataException(
-                            DATA_ERROR_NOT_FOUND
-                        )
-                    )
+                    DATA_ERROR_NOT_FOUND -> Result.failure(DataException(DATA_ERROR_NOT_FOUND))
 
                     else -> Result.failure(DataException(DATA_ERROR_SERVICE))
                 }
@@ -150,11 +141,30 @@ class DataRepository(
                 dataRemoteDataSource.deleteData(userId.getOrNull()!!, dataId)
             } catch (e: DataException) {
                 when (e.code) {
-                    in FIRESTORE_NETWORK_ERRORS,
-                    in FIRESTORE_CONCURRENCY_ERRORS,
-                    FIRESTORE_ERROR_DEADLINE -> throw DataException(DATA_ERROR_NETWORK)
+                    DATA_ERROR_NETWORK, DATA_ERROR_CONCURRENCY, DATA_ERROR_DEADLINE_EXCEEDED ->
+                        throw DataException(DATA_ERROR_NETWORK)
 
-                    FIRESTORE_ERROR_NOT_FOUND -> throw DataException(DATA_ERROR_NOT_FOUND)
+                    DATA_ERROR_NOT_FOUND -> throw DataException(DATA_ERROR_NOT_FOUND)
+
+                    else -> throw DataException(DATA_ERROR_SERVICE)
+                }
+            }
+        }
+    }
+
+    override suspend fun reportData(dataId: String) {
+        val userId = authRemoteDataSource.getUserId()
+        if (userId.isFailure) throw AuthException(AUTH_ERROR_USER_LOGGED_OUT)
+        else {
+            try {
+                dataRemoteDataSource.reportData(userId.getOrNull()!!, dataId)
+            } catch (e: DataException) {
+                when (e.code) {
+                    DATA_ERROR_NETWORK, DATA_ERROR_CONCURRENCY, DATA_ERROR_DEADLINE_EXCEEDED ->
+                        throw DataException(DATA_ERROR_NETWORK)
+
+                    DATA_ERROR_NOT_FOUND -> throw DataException(DATA_ERROR_NOT_FOUND)
+
                     else -> throw DataException(DATA_ERROR_SERVICE)
                 }
             }

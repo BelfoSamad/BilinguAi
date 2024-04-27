@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.CircularProgressIndicator
@@ -73,6 +74,7 @@ import com.samadtch.bilinguai.ui.common.DefinitionDialog
 import com.samadtch.bilinguai.ui.common.DeleteDataDialog
 import com.samadtch.bilinguai.ui.common.DictionaryDialog
 import com.samadtch.bilinguai.ui.common.NumberInputView
+import com.samadtch.bilinguai.ui.common.ReportDialog
 import com.samadtch.bilinguai.ui.common.SelectionInputView
 import com.samadtch.bilinguai.ui.common.TextInputView
 import com.samadtch.bilinguai.ui.common.TranslationDialog
@@ -446,7 +448,7 @@ fun HomeScreen(
                     item { Box(shimmerModifier); Box(shimmerModifier); Box(shimmerModifier); }
                 } else if (uiState.errorCode == null) {
                     items(
-                        items = uiState.data ?: listOf(),
+                        items = uiState.data?.filter { !it.reported } ?: listOf(),
                         key = { it.dataId!! }
                     ) {
                         DataHolder(
@@ -458,6 +460,7 @@ fun HomeScreen(
                             },
                             speak = speak,
                             ttsState = ttsState,
+                            onDataReported = viewModel::reportData,
                             onWordClicked = { w, d ->
                                 word = w
                                 definition = d
@@ -722,11 +725,22 @@ fun DataHolder(
     onDataDeleted: (dataId: String, topic: String) -> Unit,
     speak: (String, String, Int) -> Boolean,
     ttsState: Int?,
+    onDataReported: (String) -> Unit,
     onWordClicked: (word: String, definition: String) -> Unit,
     onTranslateClicked: (message: String, translation: String) -> Unit
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    var showReportDialog by rememberSaveable { mutableStateOf(false) }
 
+    //------------------------------- Dialogs
+    if(showReportDialog) ReportDialog(
+        id = data.dataId!!,
+        topic = data.topic,
+        onReport = onDataReported,
+        onDismiss = { showReportDialog = false }
+    )
+
+    //------------------------------- UI
     //Data Header
     Column(
         modifier = Modifier.animateContentSize(
@@ -739,6 +753,13 @@ fun DataHolder(
             modifier = Modifier.padding(8.dp, 8.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            IconButton(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                onClick = { showReportDialog = true }
+            ) {
+                Icon(Icons.Default.Flag, null)
+            }
             Column(Modifier.weight(1f).padding(start = 8.dp)) {
                 Text(
                     text = data.language,

@@ -135,8 +135,8 @@ android {
         applicationId = "com.samadtch.bilinguai"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2 //On Release move to 100s
+        versionName = "1.0.1" //Start from 1.0.0 on Release
     }
     buildFeatures {
         compose = true

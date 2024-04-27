@@ -4,15 +4,15 @@ class DataException(val code: Int) : Exception() {
     companion object {
         const val DATA_ERROR_NETWORK = -30 //Either concurrency problem or network interruptions
         const val DATA_ERROR_SERVICE = 30 //An error most likely related to server
-        private const val DATA_ERROR_DEADLINE_EXCEEDED = 31 //Either slow internet connection or big query
+        const val DATA_ERROR_DEADLINE_EXCEEDED = 31 //Either slow internet connection or big query
         const val DATA_ERROR_NOT_FOUND = 32 //Query not founded or empty list
         private const val DATA_ERROR_ALREADY_EXISTS = 33
-        private const val DATA_ERROR_CONCURRENCY = 34
-        private const val DATA_ERROR_UNAUTHENTICATED = 35
+        const val DATA_ERROR_CONCURRENCY = 34
+        const val DATA_ERROR_UNAUTHENTICATED = 35
 
         //Firebase - Errors
         val FIRESTORE_SERVICE_ERRORS = listOf(2, 3, 7, 8, 9, 11, 12, 13, 14, 15)
-        val FIRESTORE_NETWORK_ERRORS = listOf(1, 2, 14)
+        val FIRESTORE_NETWORK_ERRORS = listOf(1, 14)
         val FIRESTORE_CONCURRENCY_ERRORS = listOf(1, 10)
 
         const val FIRESTORE_ERROR_DEADLINE = 4

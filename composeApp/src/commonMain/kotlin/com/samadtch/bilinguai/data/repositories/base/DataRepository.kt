@@ -14,4 +14,6 @@ interface DataRepository {
 
     suspend fun deleteData(dataId: String)
 
+    suspend fun reportData(dataId: String)
+
 }

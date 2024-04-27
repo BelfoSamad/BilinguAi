@@ -25,6 +25,7 @@ import com.samadtch.bilinguai.utilities.exceptions.AuthException.Companion.AUTH_
 import com.samadtch.bilinguai.utilities.exceptions.DataException
 import com.samadtch.bilinguai.utilities.exceptions.DataException.Companion.DATA_ERROR_SERVICE
 import kotlinx.coroutines.tasks.await
+import kotlinx.datetime.Clock
 import org.koin.dsl.module
 
 class AuthRemoteSourceAndroid(
@@ -39,6 +40,7 @@ class AuthRemoteSourceAndroid(
         user.sendEmailVerification().await()
         db.collection("users").document(user.uid).set(
             mapOf<String, Any?>(
+                "createdAt" to Clock.System.now().epochSeconds,
                 "cooldown" to null,
                 "remaining" to config.getLong("GENERATIONS_COUNT").toInt()
             )

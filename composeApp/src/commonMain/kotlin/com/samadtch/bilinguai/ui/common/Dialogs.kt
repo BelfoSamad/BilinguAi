@@ -92,7 +92,8 @@ fun DictionaryDialog(
                     Spacer(Modifier.padding(8.dp))
                     Row {
                         OutlinedIconButton(
-                            modifier = Modifier.padding(end = 16.dp).align(Alignment.CenterVertically),
+                            modifier = Modifier.padding(end = 16.dp)
+                                .align(Alignment.CenterVertically),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
                             onClick = { unsaveWord(it, dictionary[it]!!) }) {
                             Icon(
@@ -118,6 +119,50 @@ fun DictionaryDialog(
                 }
             }
         }
+    )
+}
+
+@Composable
+fun ReportDialog(
+    id: String,
+    topic: String,
+    onReport: (String) -> Unit,
+    onDismiss: () -> Unit = {},
+) {
+    AlertDialog(
+        containerColor = MaterialTheme.colorScheme.primary,
+        onDismissRequest = { onDismiss() },
+        title = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(strings.report_data),
+                style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.error)
+            )
+        },
+        text = {
+            Text(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                textAlign = TextAlign.Center,
+                text = stringResource(strings.report_data_confirmation, topic),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp
+                )
+            )
+        },
+        confirmButton = {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                FilledTonalButton(
+                    colors = ErrorFilledButtonColors(),
+                    onClick = { onReport(id) }
+                ) {
+                    Text(
+                        stringResource(strings.report),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+        },
     )
 }
 
@@ -253,7 +298,8 @@ fun DeleteDataDialog(
                     color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp
                 )
             )
-        })
+        }
+    )
 }
 
 /*

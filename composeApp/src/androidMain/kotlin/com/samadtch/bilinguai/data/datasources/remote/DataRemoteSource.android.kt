@@ -9,6 +9,7 @@ import kotlinx.coroutines.tasks.await
 import com.samadtch.bilinguai.models.Data
 import org.koin.dsl.module
 import com.samadtch.bilinguai.utilities.exceptions.DataException
+import kotlinx.datetime.Clock
 
 class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSource {
 
@@ -31,7 +32,7 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
                 .get()
                 .await().data as Map<String, String>)
                 .filter {
-                    it.key !in listOf("cooldown", "remaining")
+                    it.key !in listOf("cooldown", "remaining", "createdAt")
                 }
         } catch (e: Exception) {
             null
@@ -46,7 +47,7 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
             }.associate { field -> field.name to field.get(data) }).await().id
     } catch (e: FirebaseFirestoreException) {
         if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
-            Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
+            Firebase.crashlytics.recordException(Exception("insertData: Error ${e.message}"))
         DataException.handleError(e.code.ordinal)
         null
     }
@@ -59,7 +60,7 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
             }
     } catch (e: FirebaseFirestoreException) {
         if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
-            Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
+            Firebase.crashlytics.recordException(Exception("getData: Error ${e.message}"))
         //Handle Exception
         DataException.handleError(e.code.ordinal)
         listOf() // Return empty list
@@ -71,7 +72,30 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
                 .await()
         } catch (e: FirebaseFirestoreException) {
             if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
-                Firebase.crashlytics.recordException(Exception("fetchData: Error ${e.message}"))
+                Firebase.crashlytics.recordException(Exception("deleteData: Error ${e.message}"))
+            DataException.handleError(e.code.ordinal)
+        }
+    }
+
+    override suspend fun reportData(userId: String, dataId: String) {
+        try {
+            val dataRef = db.collection("users")
+                .document(userId)
+                .collection("data")
+                .document(dataId)
+            val reportRef = db.collection("reports").document()
+
+            db.runTransaction {
+                it.update(dataRef, mapOf("reported" to true))
+                it.set(reportRef, mapOf(
+                    "userId" to userId,
+                    "dataId" to dataId,
+                    "timestamp" to Clock.System.now().epochSeconds
+                ))
+            }
+        } catch (e: FirebaseFirestoreException) {
+            if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
+                Firebase.crashlytics.recordException(Exception("reportData: Error ${e.message}"))
             DataException.handleError(e.code.ordinal)
         }
     }

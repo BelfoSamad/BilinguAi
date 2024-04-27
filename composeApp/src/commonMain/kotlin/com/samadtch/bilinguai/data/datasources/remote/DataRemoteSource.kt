@@ -15,6 +15,8 @@ interface DataRemoteSource {
 
     suspend fun deleteData(userId: String, dataId: String)
 
+    suspend fun reportData(userId: String, dataId: String)
+
 }
 
 expect fun getDataRemoteSource(): Module

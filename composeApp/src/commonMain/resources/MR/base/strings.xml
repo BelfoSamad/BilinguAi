@@ -29,6 +29,7 @@
     <string name="forgot_password_explication">Request a password reset email and follow the link provided to reset your password.</string>
     <string name="delete_account_explication">Are you certain you wish to delete your account? If yes, please confirm by entering your password.</string>
     <string name="delete_data_confirmation">Are you certain you wish to delete this conversation: "%1$s"?</string>
+    <string name="report_data_confirmation">Would you like to report this conversation "%1$s"?</string>
     <string name="cooldown_minutes">No more convo generations are available. Please wait for %1$d minutes.</string>
     <string name="cooldown_hours">No more convo generations are available. Please wait for %1$d hours and %2$d minutes.</string>
 
@@ -44,6 +45,7 @@
     <string name="generate">Generate</string>
     <string name="send">Send</string>
     <string name="delete">Delete</string>
+    <string name="report">Report</string>
 
     <!-- Labels -->
     <string name="name">by Topic</string>
@@ -59,6 +61,7 @@
     <string name="generated_data">Conversations</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="delete_data">Delete Conversation?</string>
+    <string name="report_data">Report Conversation?</string>
 
     <!-- Values -->
     <string name="x_credit">%1$d Convos</string>

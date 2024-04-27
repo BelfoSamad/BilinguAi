@@ -171,4 +171,13 @@ class HomeViewModel(
 
     fun verifyEmail() = viewModelScope.launch { userRepository.verifyEmail() }
 
+    fun reportData(id: String) {
+        viewModelScope.launch {
+            dataRepository.reportData(id)
+            _uiState.update {
+                it.copy(data = _uiState.value.data?.filter { d -> d.dataId != id })
+            }
+        }
+    }
+
 }
