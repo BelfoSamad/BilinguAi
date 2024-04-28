@@ -1,6 +1,5 @@
 package com.samadtch.bilinguai.ui.theme
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -12,7 +11,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
@@ -21,7 +19,7 @@ fun AppTheme(content: @Composable () -> Unit) {
         colorScheme = darkColorScheme(
             primary = Color(0xFF151515),//Black
             secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFFFFCE00),//Bright
+            tertiary = Color(0xFFDAEF68),//Bright
             error = Color(0xFFE74C3C),
             surfaceVariant = Color.Transparent,
         ),
@@ -126,14 +124,6 @@ fun ErrorFilledButtonColors(): ButtonColors {
     return ButtonDefaults.filledTonalButtonColors(
         containerColor = MaterialTheme.colorScheme.error,
         contentColor = MaterialTheme.colorScheme.primary,
-    )
-}
-
-@Composable
-fun OutlinedButtonColors(): BorderStroke {
-    return BorderStroke(
-        width = 1.dp,
-        color = MaterialTheme.colorScheme.secondary
     )
 }
 

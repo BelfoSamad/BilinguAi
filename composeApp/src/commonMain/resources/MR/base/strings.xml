@@ -64,6 +64,7 @@
     <string name="forgot_password">Forgot Password</string>
     <string name="delete_data">Delete Conversation?</string>
     <string name="report_data">Report Conversation?</string>
+    <string name="dictionary">Dictionary</string>
 
     <!-- Values -->
     <string name="x_credit">%1$d Convos</string>

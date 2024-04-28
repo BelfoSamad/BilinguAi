@@ -65,7 +65,14 @@ fun DictionaryDialog(
         containerColor = MaterialTheme.colorScheme.primary,
         onDismissRequest = { onDismiss() },
         confirmButton = { /*Do Nothing*/ },
-        title = {},
+        title = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(strings.dictionary),
+                style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary)
+            )
+        },
         text = {
             if (dictionary.isEmpty()) {
                 Column(
