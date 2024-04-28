@@ -72,11 +72,11 @@ class HomeViewModel(
         }
     }
 
-    fun sortData(byDate: Boolean) {
-        sortByDate = byDate
+    fun sortData(type: String) {
+        sortByDate = type == "Date"
         _uiState.update { state ->
             state.copy(
-                data = if (byDate) state.data?.sortedByDescending { it.createdAt }
+                data = if (type == "Date") state.data?.sortedByDescending { it.createdAt }
                 else state.data?.sortedBy { it.topic }
             )
         }

@@ -1,6 +1,5 @@
 package com.samadtch.bilinguai
 
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -10,10 +9,11 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.SUCCESS
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
-import android.view.View
-import android.view.animation.OvershootInterpolator
 import androidx.activity.compose.setContent
-import androidx.core.animation.doOnEnd
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
@@ -83,7 +83,6 @@ class MainActivity : FragmentActivity() {
 
     //Text To Speech
     private lateinit var tts: TextToSpeech
-    private val state = MutableStateFlow<Int?>(null)
 
     /***********************************************************************************************
      * ************************* LifeCycle
@@ -94,33 +93,6 @@ class MainActivity : FragmentActivity() {
         //Splash Screen
         installSplashScreen().apply {
             setKeepOnScreenCondition { loaded.value }
-            setOnExitAnimationListener { screen ->
-                //Zoom X
-                val zoomX = ObjectAnimator.ofFloat(
-                    screen.iconView,
-                    View.SCALE_X,
-                    0.4f,
-                    0.0f
-                )
-                zoomX.interpolator = OvershootInterpolator()
-                zoomX.duration = 500
-                zoomX.doOnEnd { screen.remove() }
-
-                //Zoom Y
-                val zoomY = ObjectAnimator.ofFloat(
-                    screen.iconView,
-                    View.SCALE_Y,
-                    0.4f,
-                    0.0f
-                )
-                zoomY.interpolator = OvershootInterpolator()
-                zoomY.duration = 1000
-                zoomY.doOnEnd { screen.remove() }
-
-                //Start
-                zoomX.start()
-                zoomY.start()
-            }
         }
 
         //Initializations
@@ -139,6 +111,8 @@ class MainActivity : FragmentActivity() {
 
         //UI
         setContent {
+            var ttsState by remember { mutableStateOf<Int?>(null) }
+
             App(
                 stringRes = { res, args -> stringResource(this, res, args) },
                 onSplashScreenDone = { lifecycleScope.launch { _loaded.emit(false) } },
@@ -151,12 +125,9 @@ class MainActivity : FragmentActivity() {
                 },
                 speak = { text, locale, index ->
                     tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                        override fun onDone(utteranceId: String?) {
-                            lifecycleScope.launch { state.emit(null) }
-                        }
-                        override fun onStart(utteranceId: String?) {
-                            lifecycleScope.launch { state.emit(index) }
-                        }
+                        override fun onDone(utteranceId: String?) { ttsState = null }
+                        override fun onStart(utteranceId: String?) { ttsState = index }
+
                         @Deprecated("Deprecated in Java")
                         override fun onError(utteranceId: String?) {}
                     })
@@ -169,7 +140,7 @@ class MainActivity : FragmentActivity() {
                             }))
                     tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString()) == SUCCESS
                 },
-                ttsState = state
+                ttsState = ttsState
             )
         }
     }

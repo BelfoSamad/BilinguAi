@@ -118,7 +118,7 @@ class DataRepository(
         else {
             try {
                 val response = dataRemoteDataSource.getData(userId.getOrNull()!!)
-                if (response.isEmpty()) Result.failure(DataException(DATA_ERROR_NOT_FOUND))
+                if (response.none { !it.reported }) Result.failure(DataException(DATA_ERROR_NOT_FOUND))
                 else Result.success(response)
             } catch (e: DataException) {
                 when (e.code) {

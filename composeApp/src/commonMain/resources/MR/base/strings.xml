@@ -46,10 +46,12 @@
     <string name="send">Send</string>
     <string name="delete">Delete</string>
     <string name="report">Report</string>
+    <string name="sort_by">Sort By</string>
+    <string name="sort_by_val">Sort By: %1$s</string>
 
     <!-- Labels -->
-    <string name="name">by Topic</string>
-    <string name="date">by Date</string>
+    <string name="name">Topic</string>
+    <string name="date">Date</string>
     <string name="temperature">Temperature:</string>
     <!-- Labels::Temperature -->
     <string name="basic">(Basic)</string>

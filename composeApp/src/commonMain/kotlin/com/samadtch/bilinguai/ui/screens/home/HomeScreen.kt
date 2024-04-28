@@ -20,8 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ReceiptLong
-import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ErrorOutline
@@ -37,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
@@ -54,6 +52,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -76,10 +76,10 @@ import com.samadtch.bilinguai.ui.common.DictionaryDialog
 import com.samadtch.bilinguai.ui.common.NumberInputView
 import com.samadtch.bilinguai.ui.common.ReportDialog
 import com.samadtch.bilinguai.ui.common.SelectionInputView
+import com.samadtch.bilinguai.ui.common.SortDropdown
 import com.samadtch.bilinguai.ui.common.TextInputView
 import com.samadtch.bilinguai.ui.common.TranslationDialog
 import com.samadtch.bilinguai.ui.common.shimmerModifier
-import com.samadtch.bilinguai.ui.theme.OutlinedButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryFilledButtonColors
 import com.samadtch.bilinguai.ui.theme.PrimaryIconButtonColors
 import com.samadtch.bilinguai.ui.theme.SecondaryIconButtonColors
@@ -147,7 +147,6 @@ fun HomeScreen(
     var showDictionaryDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDataDialog by rememberSaveable { mutableStateOf<String?>(null) }
     var topicToDelete by rememberSaveable { mutableStateOf<String?>(null) }
-    var sortByDate by rememberSaveable { mutableStateOf(true) }
     var word by rememberSaveable { mutableStateOf<String?>(null) }
     var definition by rememberSaveable { mutableStateOf<String?>(null) }
     var message by rememberSaveable { mutableStateOf<String?>(null) }
@@ -351,7 +350,7 @@ fun HomeScreen(
                                     colors = PrimaryIconButtonColors()
                                 ) {
                                     Icon(
-                                        imageVector = Icons.AutoMirrored.Default.ReceiptLong,
+                                        imageVector = Icons.AutoMirrored.Default.LibraryBooks,
                                         contentDescription = null
                                     )
                                 }
@@ -409,7 +408,7 @@ fun HomeScreen(
                 item {
                     //Top Section
                     Row(
-                        modifier = Modifier.padding(8.dp, 8.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
@@ -417,29 +416,10 @@ fun HomeScreen(
                             text = stringResource(strings.generated_data),
                             style = MaterialTheme.typography.titleLarge
                         )
-                        OutlinedButton(
+                        SortDropdown(
                             modifier = Modifier.align(Alignment.CenterVertically),
-                            border = OutlinedButtonColors(),
-                            onClick = {
-                                sortByDate = !sortByDate
-                                viewModel.sortData(sortByDate)
-                            }
-                        ) {
-                            Icon(
-                                modifier = Modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
-                                    .align(Alignment.CenterVertically),
-                                imageVector = Icons.AutoMirrored.Filled.Sort,
-                                tint = MaterialTheme.colorScheme.secondary,
-                                contentDescription = null
-                            )
-                            Text(
-                                text = if (sortByDate) stringResource(strings.date)
-                                else stringResource(strings.name),
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            )
-                        }
+                            onSortPicked = { viewModel.sortData(it) }
+                        )
                     }
                 }
 
@@ -509,6 +489,7 @@ fun DynamicForm(
     onGenerateClicked: (data: Map<String, Any>, temperature: Float) -> Unit
 ) {
     //------------------------------- Declarations
+    val hapticFeedback = LocalHapticFeedback.current
     var sliderPosition by remember { mutableFloatStateOf(0.7f) }
     val dataFlow = remember { inputs.flatten().map { MutableSharedFlow<Pair<String, Any>?>() } }
     var generateClicked by remember { mutableStateOf(false) }
@@ -690,7 +671,10 @@ fun DynamicForm(
             Slider(
                 modifier = Modifier.padding(0.dp),
                 value = sliderPosition,
-                onValueChange = { sliderPosition = it },
+                onValueChange = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    sliderPosition = it
+                },
                 steps = 10,
                 colors = SliderDefaults.colors(
                     inactiveTickColor = MaterialTheme.colorScheme.primary,
@@ -733,7 +717,7 @@ fun DataHolder(
     var showReportDialog by rememberSaveable { mutableStateOf(false) }
 
     //------------------------------- Dialogs
-    if(showReportDialog) ReportDialog(
+    if (showReportDialog) ReportDialog(
         id = data.dataId!!,
         topic = data.topic,
         onReport = onDataReported,
@@ -753,13 +737,6 @@ fun DataHolder(
             modifier = Modifier.padding(8.dp, 8.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                onClick = { showReportDialog = true }
-            ) {
-                Icon(Icons.Default.Flag, null)
-            }
             Column(Modifier.weight(1f).padding(start = 8.dp)) {
                 Text(
                     text = data.language,
@@ -798,6 +775,12 @@ fun DataHolder(
                     onClick = { if (ttsState == null) onDataDeleted(data.dataId!!, data.topic) }
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
+                }
+                IconButton(
+                    colors = SecondaryIconButtonColors(),
+                    onClick = { showReportDialog = true }
+                ) {
+                    Icon(Icons.Default.Flag, null)
                 }
             }
         }
@@ -847,6 +830,16 @@ fun DataContent(
                     }
                 }
                 if (index % 2 == 1) {
+                    if (data.translation != null) IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        colors = SecondaryIconButtonColors(),
+                        onClick = { onTranslateClicked(item, data.translation[index]) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = null
+                        )
+                    }
                     IconButton(
                         modifier = Modifier.align(Alignment.CenterVertically),
                         colors = IconButtonDefaults.outlinedIconButtonColors(
@@ -862,22 +855,8 @@ fun DataContent(
                             )
                         }
                     ) {
-                        if (ttsState == index) CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.CenterVertically).size(28.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        ) else Icon(
-                            imageVector = Icons.AutoMirrored.Default.VolumeUp,
-                            contentDescription = null
-                        )
-                    }
-                    if (data.translation != null) IconButton(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        colors = SecondaryIconButtonColors(),
-                        onClick = { onTranslateClicked(item, data.translation[index]) }
-                    ) {
                         Icon(
-                            imageVector = Icons.Default.Translate,
+                            imageVector = Icons.AutoMirrored.Default.VolumeUp,
                             contentDescription = null
                         )
                     }
@@ -900,6 +879,7 @@ fun DataContent(
                         }
                     }
                 )
+
                 if (index % 2 == 0) {
                     IconButton(
                         modifier = Modifier.align(Alignment.CenterVertically),
@@ -916,11 +896,7 @@ fun DataContent(
                             )
                         }
                     ) {
-                        if (ttsState == index) CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.CenterVertically).size(28.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        ) else Icon(
+                        Icon(
                             imageVector = Icons.AutoMirrored.Default.VolumeUp,
                             contentDescription = null
                         )

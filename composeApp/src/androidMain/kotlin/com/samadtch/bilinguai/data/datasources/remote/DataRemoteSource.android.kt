@@ -1,7 +1,6 @@
 package com.samadtch.bilinguai.data.datasources.remote
 
 import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
@@ -13,13 +12,27 @@ import kotlinx.datetime.Clock
 
 class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSource {
 
-    override suspend fun saveDictionary(userId: String?, word: String, definition: String, saved: Boolean) {
+    override suspend fun saveDictionary(
+        userId: String?,
+        word: String,
+        definition: String,
+        saved: Boolean
+    ) {
         try {
             if (userId != null) {
-                if (saved) db.collection("users").document(userId).update(mapOf(word to definition))
-                else db.collection("users").document(userId).update(mapOf(word to FieldValue.delete()))
+                val userRef = db.collection("users").document(userId)
+                db.runTransaction {
+                    //Update Dictionary
+                    val dictionary = (it.get(userRef).data!!["dictionary"] as Map<*, *>?)
+                        ?.toMutableMap() ?: mutableMapOf()
+                    if (saved) dictionary[word] = definition else dictionary.remove(word)
+
+                    //Push Dictionary Updates
+                    it.update(userRef, mapOf("dictionary" to dictionary))
+                }
             }
         } catch (_: Exception) {
+            //DO NOTHING
         }
     }
 
@@ -27,14 +40,13 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
     override suspend fun getDictionary(userId: String?): Map<String, String>? {
         return try {
             if (userId == null) null
-            else (db.collection("users")
+            else db.collection("users")
                 .document(userId)
                 .get()
-                .await().data as Map<String, String>)
-                .filter {
-                    it.key !in listOf("cooldown", "remaining", "createdAt")
-                }
+                .await()
+                .data!!["dictionary"] as Map<String, String>?
         } catch (e: Exception) {
+            //DO NOTHING
             null
         }
     }
@@ -87,11 +99,13 @@ class DataRemoteSourceAndroid(private val db: FirebaseFirestore) : DataRemoteSou
 
             db.runTransaction {
                 it.update(dataRef, mapOf("reported" to true))
-                it.set(reportRef, mapOf(
-                    "userId" to userId,
-                    "dataId" to dataId,
-                    "timestamp" to Clock.System.now().epochSeconds
-                ))
+                it.set(
+                    reportRef, mapOf(
+                        "userId" to userId,
+                        "dataId" to dataId,
+                        "timestamp" to Clock.System.now().epochSeconds
+                    )
+                )
             }
         } catch (e: FirebaseFirestoreException) {
             if (e.code.ordinal in DataException.FIRESTORE_SERVICE_ERRORS)
