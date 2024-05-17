@@ -14,7 +14,6 @@ import com.samadtch.bilinguai.ui.screens.home.HomeScreen
 import com.samadtch.bilinguai.ui.screens.home.HomeViewModel
 import dev.icerock.moko.resources.StringResource
 import getHypes
-import getInputs
 import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.NavOptions
@@ -149,7 +148,6 @@ fun Nav(
             HomeScreen(
                 viewmodel,
                 onShowSnackbar = onShowSnackbar,
-                inputs = getInputs(),
                 openDrawer = openDrawer,
                 showInterstitialAd = showInterstitialAd,
                 speak = speak,

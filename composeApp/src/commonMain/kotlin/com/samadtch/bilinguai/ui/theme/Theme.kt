@@ -19,7 +19,7 @@ fun AppTheme(content: @Composable () -> Unit) {
         colorScheme = darkColorScheme(
             primary = Color(0xFF151515),//Black
             secondary = Color(0xFF666666),//Gray
-            tertiary = Color(0xFFDAEF68),//Bright
+            tertiary = Color(0xFFDAEF68),//Bright, TODO: Change Color
             error = Color(0xFFE74C3C),
             surfaceVariant = Color.Transparent,
         ),

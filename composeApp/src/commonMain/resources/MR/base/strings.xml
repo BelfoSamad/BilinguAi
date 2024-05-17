@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <!-- TODO: Change App Name -->
     <string name="appName">BilinguAi</string>
     <!-- Inputs -->
     <string name="email_placeholder">Enter your email address</string>

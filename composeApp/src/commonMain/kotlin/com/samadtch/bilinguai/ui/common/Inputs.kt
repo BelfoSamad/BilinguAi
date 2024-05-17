@@ -33,11 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.samadtch.bilinguai.Resources.strings
-import com.samadtch.bilinguai.models.pojo.inputs.BooleanInput
-import com.samadtch.bilinguai.models.pojo.inputs.NumberInput
 import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
 import com.samadtch.bilinguai.ui.theme.PrimaryTextFieldColors
@@ -103,147 +100,6 @@ fun TextInputView(
             },
             value = value,
             onValueChange = { value = it }
-        )
-    }
-}
-
-@Composable
-fun NumberInputView(
-    enable: Boolean,
-    input: NumberInput,
-    onDataRequested: Boolean,
-    onDataReset: Boolean,
-    valueFlow: MutableSharedFlow<Pair<String, Any>?>,
-    modifier: Modifier = Modifier.fillMaxWidth()
-) {
-    //------------------------------- Declarations
-    var value by rememberSaveable { mutableStateOf(input.defaultValue ?: "") }
-    var error by rememberSaveable { mutableStateOf<StringResource?>(null) }
-    //Data
-    val onlyDigitsRegex = """^(?:${'$'}|[1-9]\d*${'$'})"""
-    val negativeRegex = """^${'$'}|^(-?[1-9]\d*|0)${'$'}"""
-    val decimalRegex = """^${'$'}|^(?!-)(?:\d+|\d*\.\d+)${'$'}"""
-    val allRegex = """^(-?\d*\.?\d+|)${'$'}"""
-
-    //------------------------------- Effect
-    LaunchedEffect(onDataRequested) {
-        if (onDataRequested) {
-            if (value.isBlank()) {
-                error = strings.error_required
-                valueFlow.emit(null)
-            } else if (input.minValue != null && value.toDouble() < input.minValue!!) {
-                error = strings.error_min
-                valueFlow.emit(null)
-            } else if (input.maxValue != null && value.toDouble() > input.maxValue!!) {
-                error = strings.error_max
-                valueFlow.emit(null)
-            } else {
-                error = null
-                valueFlow.emit(Pair(input.key, value))
-            }
-        }
-    }
-    LaunchedEffect(onDataReset) {
-        if (onDataReset) value = ""
-    }
-
-    //------------------------------- UI
-    Column(modifier.padding(16.dp, 8.dp)) {
-        Text(
-            text = input.label,
-            style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
-        )
-        TextField(
-            modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
-            colors = PrimaryTextFieldColors(),
-            enabled = enable,
-            textStyle = MaterialTheme.typography.labelSmall,
-            placeholder = {
-                Text(
-                    text = input.hint,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            },
-            isError = error != null,
-            supportingText = {
-                if (error != null) Text(
-                    text = when (error!!) {
-                        strings.error_required -> stringResource(
-                            strings.error_required,
-                            listOf(input.label)
-                        )
-
-                        strings.error_min -> stringResource(
-                            strings.error_min,
-                            input.label,
-                            input.minValue!!
-                        )
-
-                        else -> stringResource(
-                            strings.error_max,
-                            listOf(input.label, input.maxValue!!)
-                        )
-                    },
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            value = value,
-            onValueChange = {
-                //Check Decimal/Negative
-                val regex: String = if (input.isDecimal && input.isNegative) allRegex
-                else if (input.isDecimal) decimalRegex
-                else if (input.isNegative) negativeRegex
-                else onlyDigitsRegex
-                //Validate
-                if (Regex(regex).matches(it + "1")) value = it
-            }
-        )
-    }
-}
-
-@Composable
-fun CheckboxInputView(
-    enable: Boolean,
-    input: BooleanInput,
-    onDataRequested: Boolean,
-    onDataReset: Boolean,
-    valueFlow: MutableSharedFlow<Pair<String, Any>?>,
-    modifier: Modifier = Modifier.fillMaxWidth()
-) {
-    //------------------------------- Declarations
-    var value by remember { mutableStateOf(input.defaultValue) }
-
-    //------------------------------- Effect
-    LaunchedEffect(onDataRequested) {
-        if (onDataRequested) {
-            valueFlow.emit(Pair(input.key, value))
-        }
-    }
-    LaunchedEffect(onDataReset) {
-        if (onDataReset) value = input.defaultValue
-    }
-
-
-    //------------------------------- UI
-    Row(modifier.padding(16.dp, 0.dp)) {
-        Checkbox(
-            enabled = enable,
-            checked = value,
-            colors = CheckboxDefaults.colors(
-                uncheckedColor = MaterialTheme.colorScheme.primary,
-                checkedColor = MaterialTheme.colorScheme.primary,
-                checkmarkColor = MaterialTheme.colorScheme.tertiary,
-            ),
-            onCheckedChange = { value = it },
-        )
-        Text(
-            modifier = Modifier.align(Alignment.CenterVertically).weight(1f),
-            text = input.label,
-            style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.primary)
         )
     }
 }

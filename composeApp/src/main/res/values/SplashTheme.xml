@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="SplashTheme" parent="Theme.SplashScreen">
+        <!-- TODO: Change Color -->
         <item name="windowSplashScreenBackground">#DAEF68</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_base</item>
         <item name="postSplashScreenTheme">@style/AppTheme</item>

@@ -34,6 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import languages
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -131,13 +132,7 @@ class MainActivity : FragmentActivity() {
                         @Deprecated("Deprecated in Java")
                         override fun onError(utteranceId: String?) {}
                     })
-                    tts.setLanguage(Locale(when (locale) {
-                                "Arabic" -> "ar"
-                                "English" -> "en"
-                                "French" -> "fr"
-                                "Italian" -> "it"
-                                else -> "es"
-                            }))
+                    tts.setLanguage(Locale(languages[locale]!!))
                     tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString()) == SUCCESS
                 },
                 ttsState = ttsState

@@ -64,16 +64,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samadtch.bilinguai.Resources.strings
 import com.samadtch.bilinguai.models.Data
-import com.samadtch.bilinguai.models.pojo.inputs.BaseInput
-import com.samadtch.bilinguai.models.pojo.inputs.BooleanInput
-import com.samadtch.bilinguai.models.pojo.inputs.NumberInput
 import com.samadtch.bilinguai.models.pojo.inputs.OptionsInput
 import com.samadtch.bilinguai.models.pojo.inputs.TextInput
-import com.samadtch.bilinguai.ui.common.CheckboxInputView
 import com.samadtch.bilinguai.ui.common.DefinitionDialog
 import com.samadtch.bilinguai.ui.common.DeleteDataDialog
 import com.samadtch.bilinguai.ui.common.DictionaryDialog
-import com.samadtch.bilinguai.ui.common.NumberInputView
 import com.samadtch.bilinguai.ui.common.ReportDialog
 import com.samadtch.bilinguai.ui.common.SelectionInputView
 import com.samadtch.bilinguai.ui.common.SortDropdown
@@ -99,6 +94,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import languages
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -128,7 +124,6 @@ data class GenerationUiState(
 fun HomeScreen(
     viewModel: HomeViewModel,
     onShowSnackbar: (Boolean, StringResource, List<Any>?, String?) -> Unit,
-    inputs: List<List<BaseInput>>,
     openDrawer: () -> Unit,
     showInterstitialAd: () -> Unit,
     speak: (String, String, Int) -> Boolean,
@@ -393,7 +388,6 @@ fun HomeScreen(
 
                         //Dynamic Form
                         DynamicForm(
-                            inputs = inputs,
                             generationState = generationState,
                             onGenerateClicked = { inputs, temperature ->
                                 viewModel.generateData(
@@ -408,7 +402,8 @@ fun HomeScreen(
                 item {
                     //Top Section
                     Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp)
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
@@ -484,14 +479,19 @@ fun HomeScreen(
 
 @Composable
 fun DynamicForm(
-    inputs: List<List<BaseInput>>,
     generationState: GenerationUiState?,
     onGenerateClicked: (data: Map<String, Any>, temperature: Float) -> Unit
 ) {
     //------------------------------- Declarations
     val hapticFeedback = LocalHapticFeedback.current
     var sliderPosition by remember { mutableFloatStateOf(0.7f) }
-    val dataFlow = remember { inputs.flatten().map { MutableSharedFlow<Pair<String, Any>?>() } }
+    val dataFlow = remember {
+        listOf<MutableSharedFlow<Pair<String, Any>?>>(
+            MutableSharedFlow(),
+            MutableSharedFlow(),
+            MutableSharedFlow()
+        )
+    }
     var generateClicked by remember { mutableStateOf(false) }
     var disableInputs by remember { mutableStateOf(false) }
     var resetInput by remember { mutableStateOf(false) }
@@ -520,124 +520,53 @@ fun DynamicForm(
 
     //------------------------------- UI
     //Form
-    var flattenedIndex = 0
-    inputs.forEach { row ->
-        if (row.size == 1) {
-            when (val input = row[0]) {
-                is TextInput -> TextInputView(
-                    !disableInputs,
-                    input,
-                    generateClicked,
-                    resetInput,
-                    dataFlow[flattenedIndex]
-                )
-
-                is NumberInput -> NumberInputView(
-                    !disableInputs,
-                    input,
-                    generateClicked,
-                    resetInput,
-                    dataFlow[flattenedIndex]
-                )
-
-                is OptionsInput -> SelectionInputView(
-                    !disableInputs,
-                    input,
-                    generateClicked,
-                    resetInput,
-                    dataFlow[flattenedIndex]
-                )
-
-                is BooleanInput -> CheckboxInputView(
-                    !disableInputs,
-                    input,
-                    generateClicked,
-                    resetInput,
-                    dataFlow[flattenedIndex]
-                )
-            }
-            flattenedIndex++
-        } else {
-            Row(Modifier.fillMaxWidth()) {
-                when (val input = row[0]) {
-                    is TextInput -> TextInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-
-                    is NumberInput -> NumberInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-
-                    is OptionsInput -> SelectionInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-
-                    is BooleanInput -> CheckboxInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-                }
-                flattenedIndex++
-                Spacer(Modifier.padding(4.dp))
-                when (val input = row[1]) {
-                    is TextInput -> TextInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-
-                    is NumberInput -> NumberInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-
-                    is OptionsInput -> SelectionInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-
-                    is BooleanInput -> CheckboxInputView(
-                        !disableInputs,
-                        input,
-                        generateClicked,
-                        resetInput,
-                        dataFlow[flattenedIndex],
-                        Modifier.weight(1f).align(Alignment.CenterVertically)
-                    )
-                }
-                flattenedIndex++
-            }
-        }
+    TextInputView(
+        !disableInputs,
+        TextInput(
+            key = "topic",
+            label = "Topic",
+            lines = 3,
+            hint = "What to talk about...",
+            defaultValue = null
+        ),
+        generateClicked,
+        resetInput,
+        dataFlow[0]
+    )
+    Row(Modifier.fillMaxWidth()) {
+        SelectionInputView(
+            !disableInputs,
+            OptionsInput(
+                key = "native",
+                label = "Native Language",
+                options = languages.keys.toList(),
+                hint = "Native",
+                maxSelection = 1,
+                minSelection = 1,
+                multiSelection = false
+            ),
+            generateClicked,
+            resetInput,
+            dataFlow[1],
+            Modifier.weight(1f).align(Alignment.CenterVertically)
+        )
+        Spacer(Modifier.padding(4.dp))
+        SelectionInputView(
+            !disableInputs,
+            OptionsInput(
+                key = "foreign",
+                label = "Foreign Language",
+                options = languages.keys.toList(),
+                hint = "Foreign",
+                maxSelection = 1,
+                minSelection = 1,
+                multiSelection = false
+            ),
+            generateClicked,
+            resetInput,
+            dataFlow[2],
+            Modifier.weight(1f).align(Alignment.CenterVertically)
+        )
     }
 
     //Generate
